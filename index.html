@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Meal</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="app">
+
+<!-- NAVBAR -->
+<header class="navbar">
+
+  <div class="logo">
+    🍽 Smart Meal
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="#home" data-lang="home">الرئيسية</a></li>
+    <li><a href="#menu" data-lang="menu">القائمة</a></li>
+    <li><a href="#health" data-lang="health">صحة</a></li>
+    <li><a href="#payment" data-lang="payment">الدفع</a></li>
+    <li><a href="#contact" data-lang="contact">تواصل</a></li>
+  </ul>
+
+  <!-- Language Switch -->
+  <div class="lang-switch">
+    <button onclick="setLang('ar')">AR</button>
+    <button onclick="setLang('en')">EN</button>
+  </div>
+
+  <button class="cart-btn" onclick="toggleCart()">
+    🛒 <span id="cartCount">0</span>
+  </button>
+
+</header>
+
+<!-- HERO -->
+<section id="home" class="hero">
+  <h1>Smart Meal 🍔</h1>
+  <p>وجبات صحية • سريعة • ذكية</p>
+  <a href="#menu" class="main-btn" data-lang="start">ابدأ الطلب</a>
+</section>
+
+<!-- MENU -->
+<section id="menu" class="section">
+
+  <div class="card">
+    <img src="https://i.ibb.co/yF0fngXw/IMG-1631.jpg">
+    <h3>دجاج مشوي</h3>
+    <p>450 دج</p>
+    <button data-lang="add" onclick="addToCart('دجاج مشوي',450)">إضافة</button>
+  </div>
+
+</section>
+
+<!-- HEALTH -->
+<section id="health" class="section light">
+  <h2 data-lang="health">توصيات صحية</h2>
+
+  <div class="health-grid">
+    <div class="health-card">🥗 صحي</div>
+    <div class="health-card">💧 ماء</div>
+    <div class="health-card">🏃 رياضة</div>
+    <div class="health-card">🍗 بروتين</div>
+  </div>
+</section>
+
+<!-- PAYMENT -->
+<section id="payment" class="section">
+  <h2 data-lang="payment">الدفع</h2>
+  <button class="pay-btn" onclick="checkout()">ادفع الآن</button>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section light">
+  <h2 data-lang="contact">تواصل</h2>
+
+  <iframe
+    src="https://www.google.com/maps?q=Skikda,Algeria&output=embed"
+    width="100%" height="250">
+  </iframe>
+
+</section>
+
+</div>
+
+<!-- CART -->
+<div id="cartBox">
+  <h3 data-lang="cart">السلة</h3>
+  <div id="cartItems"></div>
+  <p><b id="total">0 دج</b></p>
+  <button onclick="checkout()">تأكيد الطلب</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
