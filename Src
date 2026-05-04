@@ -1,0 +1,16 @@
+src/
+ ├── components
+ │    ├── Navbar.jsx
+ │    └── FoodCard.jsx
+ ├── context
+ │    └── CartContext.js
+ ├── data
+ │    └── foodData.js
+ ├── pages
+ │    ├── Home.jsx
+ │    ├── Menu.jsx
+ │    ├── Details.jsx
+ │    └── Cart.jsx
+ ├── App.js
+ ├── App.css
+ └── index.js
