@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  font-family: Arial;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  background: #ff6b00;
+  color: white;
+}
+
+.nav a {
+  color: white;
+  margin: 10px;
+  text-decoration: none;
+}
+
+.container {
+  padding: 20px;
+  text-align: center;
+}
+
+.grid {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.btn {
+  background: #ff6b00;
+  color: white;
+  padding: 10px;
+  border: none;
+  margin-top: 10px;
+}
