@@ -1,0 +1,27 @@
+import { useParams } from "react-router-dom";
+import { useContext } from "react";
+import foods from "../data/foodData";
+import Navbar from "../components/Navbar";
+import { CartContext } from "../context/CartContext";
+
+export default function Details() {
+  const { id } = useParams();
+  const { addToCart } = useContext(CartContext);
+
+  const food = foods.find(f => f.id == id);
+
+  return (
+    <>
+      <Navbar />
+      <div className="container">
+        <h2>{food.name}</h2>
+        <img src={food.image} alt="" />
+        <p>{food.price} DA</p>
+
+        <button className="btn" onClick={() => addToCart(food)}>
+          أضف إلى السلة
+        </button>
+      </div>
+    </>
+  );
+}
