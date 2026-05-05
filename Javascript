@@ -1,0 +1,68 @@
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let total = 0;
+let lang = localStorage.getItem("lang") || "ar";
+
+// ================== الترجمة ==================
+const t = {
+ar:{
+add:"تمت الإضافة",
+cartEmpty:"السلة فارغة",
+order:"طلبك",
+total:"المجموع",
+pay:"تم تأكيد الطلب",
+addBtn:"أضف للسلة"
+},
+en:{
+add:"Added",
+cartEmpty:"Cart is empty",
+order:"Your order",
+total:"Total",
+pay:"Order confirmed",
+addBtn:"Add to cart"
+}
+};
+
+// ================== تحديث العداد ==================
+function updateCart(){
+document.getElementById("cartCount").innerText = cart.length;
+}
+
+// ================== إضافة للسلة ==================
+function addToCart(name,price){
+cart.push({name,price});
+localStorage.setItem("cart",JSON.stringify(cart));
+updateCart();
+alert(`${t[lang].add} ${name}`);
+}
+
+// ================== فتح السلة ==================
+function openCart(){
+if(cart.length===0){
+alert(t[lang].cartEmpty);
+return;
+}
+
+let text = cart.map(i=>`${i.name} - ${i.price} دج`).join("\n");
+let sum = cart.reduce((a,b)=>a+b.price,0);
+
+alert(`${t[lang].order}:\n\n${text}\n\n${t[lang].total}: ${sum} دج`);
+}
+
+// ================== الدفع ==================
+function confirmOrder(){
+if(cart.length===0){
+alert(t[lang].cartEmpty);
+return;
+}
+
+alert(t[lang].pay);
+
+// فتح واتساب
+let msg = cart.map(i=>`${i.name} - ${i.price}`).join("%0A");
+let total = cart.reduce((a,b)=>a+b.price,0);
+
+window.open(`https://wa.me/213671070943?text=طلب جديد:%0A${msg}%0Aالمجموع: ${total} دج`);
+}
+
+// ================== تشغيل عند البداية ==================
+updateCart();
