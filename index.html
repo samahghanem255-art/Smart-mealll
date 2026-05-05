@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-key="title">Smart Meal | منصة الوجبات الذكية</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg">
+    <span data-key="brand">Smart Meal</span>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="#home" data-key="home">الرئيسية</a></li>
+    <li><a href="#menu" data-key="menu">قائمة الطعام</a></li>
+    <li><a href="#health" data-key="health">توصيات صحية</a></li>
+    <li><a href="#payment" data-key="payment">الدفع</a></li>
+    <li><a href="#contact" data-key="contact">تواصل</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+
+    <button onclick="setLang('ar')">AR</button>
+    <button onclick="setLang('en')">EN</button>
+
+    <a href="https://wa.me/213671070943" target="_blank">💬</a>
+    <a href="tel:+213671070943">📞</a>
+  </div>
+</header>
+
+<section id="home" class="hero">
+  <h1 data-key="heroTitle">Smart Meal</h1>
+  <p data-key="heroDesc">اختيارات صحية • توصيات ذكية • توصيل سريع</p>
+  <a href="#menu" class="main-btn" data-key="start">ابدأ الطلب</a>
+</section>
+
+<section id="menu" class="section">
+<h2 data-key="menuTitle">🍽️ قائمة الطعام</h2>
+
+<div class="cards">
+
+<div class="card">
+<img src="https://i.ibb.co/yF0fngXw/IMG-1631.jpg">
+<h3 data-key="meal1">دجاج مشوي</h3>
+<p>450 دج</p>
+<button onclick="addToCart('دجاج مشوي',450)" data-key="add">أضف للسلة</button>
+</div>
+
+<div class="card">
+<img src="https://i.ibb.co/27sqWTFn/IMG-1630.jpg">
+<h3 data-key="meal2">وجبة أرز</h3>
+<p>450 دج</p>
+<button onclick="addToCart('وجبة أرز',450)" data-key="add">أضف للسلة</button>
+</div>
+
+<div class="card">
+<img src="https://i.ibb.co/xScPBgxw/IMG-1629.jpg">
+<h3 data-key="meal3">باستا بالدجاج</h3>
+<p>450 دج</p>
+<button onclick="addToCart('باستا بالدجاج',450)" data-key="add">أضف للسلة</button>
+</div>
+
+</div>
+</section>
+
+<section id="health" class="section light">
+<h2 data-key="healthTitle">🤖 توصيات صحية ذكية</h2>
+
+<div class="health-grid">
+  <div class="health-card" data-key="h1">🥗 وجبات منخفضة السعرات</div>
+  <div class="health-card" data-key="h2">💧 شرب الماء</div>
+  <div class="health-card" data-key="h3">🥩 بروتين متوازن</div>
+  <div class="health-card" data-key="h4">🏃 رياضة</div>
+</div>
+</section>
+
+<section id="payment" class="section">
+<h2 data-key="payTitle">💳 الدفع</h2>
+<p data-key="payDesc">الدفع عبر البطاقة الذهبية</p>
+<button class="pay-btn" onclick="confirmOrder()" data-key="pay">ادفع الآن</button>
+</section>
+
+<section id="contact" class="section light">
+<h2 data-key="contactTitle">📍 تواصل معنا</h2>
+
+<iframe src="https://www.google.com/maps?q=Skikda,Algeria&output=embed"
+width="100%" height="300" style="border:0;border-radius:15px;"></iframe>
+</section>
+
+<footer>© 2026 Smart Meal</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
