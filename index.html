@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-key="title">Smart Meal</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg">
+    <span>Smart Meal</span>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="#home" data-key="home">الرئيسية</a></li>
+    <li><a href="#menu" data-key="menu">القائمة</a></li>
+    <li><a href="#health" data-key="health">صحي</a></li>
+    <li><a href="#payment" data-key="payment">الدفع</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+    <button onclick="changeLanguage('ar')">AR</button>
+    <button onclick="changeLanguage('en')">EN</button>
+    <button onclick="toggleDark()">🌙</button>
+  </div>
+</header>
+
+<section id="home" class="hero">
+  <h1 data-key="title">Smart Meal</h1>
+  <p data-key="subtitle">وجبات صحية وذكية</p>
+  <a href="#menu" class="main-btn" data-key="start">ابدأ الطلب</a>
+</section>
+
+<section id="menu" class="section">
+<h2 data-key="menuTitle">🍽️ القائمة</h2>
+
+<div class="cards">
+
+<div class="card">
+<img src="https://i.ibb.co/yF0fngXw/IMG-1631.jpg">
+<h3 data-key="meal1">دجاج مشوي</h3>
+<p>450 دج</p>
+<p class="calories">🔥 350 <span data-key="calories">سعرات</span></p>
+<button onclick="addToCart('دجاج مشوي',450)" data-key="add">أضف للسلة</button>
+</div>
+
+<div class="card">
+<img src="https://i.ibb.co/27sqWTFn/IMG-1630.jpg">
+<h3 data-key="meal2">أرز</h3>
+<p>450 دج</p>
+<p class="calories">🔥 400 <span data-key="calories">سعرات</span></p>
+<button onclick="addToCart('أرز',450)" data-key="add">أضف للسلة</button>
+</div>
+
+</div>
+</section>
+
+<section id="health" class="section light">
+<h2 data-key="healthTitle">توصيات صحية</h2>
+<div class="health-grid">
+  <div class="health-card">🥗 صحي</div>
+  <div class="health-card">💧 ماء</div>
+  <div class="health-card">🥩 بروتين</div>
+  <div class="health-card">🏃 رياضة</div>
+</div>
+</section>
+
+<section id="payment" class="section">
+<h2 data-key="paymentTitle">الدفع</h2>
+<button class="pay-btn" onclick="confirmOrder()" data-key="pay">ادفع الآن</button>
+</section>
+
+<footer>© Smart Meal</footer>
+
+<div id="notif" class="notification"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
