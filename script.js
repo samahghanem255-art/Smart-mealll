@@ -256,11 +256,31 @@ function removeFromCart(index) {
   updateCalorieProgress();
 }
 
-function confirmOrder() {
+async function confirmOrder() {
   const t = i18n[currentLang];
-  if (cart.length === 0) { showToast('⚠️ ' + t.add_first); return; }
-  const items = cart.map(i => `${i.name} - ${i.price} ${t.currency}`).join('%0A');
-  window.open(`https://wa.me/213671070943?text=${t.order_msg} ${total} ${t.currency}%0A${items}`);
+  if (cart.length === 0) {
+    showToast('⚠️ ' + t.add_first);
+    return;
+  }
+  const orderData = {
+    items: cart.map(i => ({
+      name: i.name,
+      price: i.price
+    })),
+    total: total,
+    status: 'pending'
+  };
+  const saved = await saveOrderToDatabase(orderData);
+  if (!saved) return;
+  const items = cart
+    .map(i => `${i.name} - ${i.price} ${t.currency}`)
+    .join('\n');
+  const message =
+    `${t.order_msg} ${total} ${t.currency}\n${items}`;
+  window.open(
+    `https://wa.me/213671070943?text=${encodeURIComponent(message)}`,
+    '_blank'
+  );
 }
 
 // =====================
