@@ -271,16 +271,18 @@ async function saveOrderToDatabase(orderData) {
     const deliveryAddress =
       document.getElementById('deliveryAddress')?.value?.trim() || null;
     const orderGroupId = crypto.randomUUID();
-    const rows = orderData.items.map(item => ({
-      meal_name: item.name,
-      quantity: 1,
-      total_price: item.price,
-      status: 'pending',
-      order_group_id: orderGroupId,
-      customer_name: customerName,
-      customer_phone: customerPhone,
-      delivery_address: deliveryAddress
-    }));
+    
+const rows = orderData.items.map(item => ({
+  meal_name: item.name,
+  quantity: item.quantity || 1,
+  total_price: item.price * (item.quantity || 1),
+  status: 'pending',
+  order_group_id: orderGroupId,
+  customer_name: customerName,
+  customer_phone: customerPhone,
+  delivery_address: deliveryAddress
+}));
+
     const { error } = await client
       .from('orders')
       .insert(rows);
