@@ -354,12 +354,3 @@ function updateCalorieProgress() {
 document.getElementById('cartModal').addEventListener('click', function(e) {
   if (e.target === this) closeCart();
 });
-const SUPABASE_URL = “https://xvghguxdgezhiowswvsd.supabase.co”;
-const SUPABASE_KEY = “sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG”;
-
-const supabaseClient = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
-
-console.log(“Smart Meal: Supabase client initialized”);
