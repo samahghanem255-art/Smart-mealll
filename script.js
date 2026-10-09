@@ -256,12 +256,46 @@ function removeFromCart(index) {
   updateCalorieProgress();
 }
 
-async function confirmOrder() {
-  const t = i18n[currentLang];
-  if (cart.length === 0) {
-    showToast('⚠️ ' + t.add_first);
-    return;
+// حفظ الطلب في قاعدة بيانات Supabase
+async function saveOrderToDatabase(orderData) {
+  try {
+    const client = window.supabaseClient;
+    if (!client) {
+      alert('تعذر الاتصال بقاعدة البيانات.');
+      return false;
+    }
+    const customerName =
+      document.getElementById('customerName')?.value?.trim() || null;
+    const customerPhone =
+      document.getElementById('customerPhone')?.value?.trim() || null;
+    const deliveryAddress =
+      document.getElementById('deliveryAddress')?.value?.trim() || null;
+    const orderGroupId = crypto.randomUUID();
+    const rows = orderData.items.map(item => ({
+      meal_name: item.name,
+      quantity: 1,
+      total_price: item.price,
+      status: 'pending',
+      order_group_id: orderGroupId,
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      delivery_address: deliveryAddress
+    }));
+    const { error } = await client
+      .from('orders')
+      .insert(rows);
+    if (error) {
+      console.error('Supabase:', error);
+      alert('تعذر حفظ الطلب: ' + error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+    alert('حدث خطأ أثناء حفظ الطلب.');
+    return false;
   }
+}
   const orderData = {
     items: cart.map(i => ({
       name: i.name,
