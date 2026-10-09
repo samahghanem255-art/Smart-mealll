@@ -317,6 +317,31 @@ window.supabaseClient = window.supabase.createClient(
       <span class="pay-icon">🔒</span>
     </div>
     <p class="pay-desc" data-i18n="pay_desc">بياناتك محمية بتشفير SSL · دفع فوري آمن</p>
+    
+<p class="pay-desc" data-i18n="pay_desc">بياناتك محمية بتشفير SSL · دفع فوري آمن</p>
+
+<div class="customer-info">
+  <label for="customerName">اسم الزبون</label>
+  <input
+    type="text"
+    id="customerName"
+    placeholder="أدخلي اسمك"
+  >
+
+  <label for="customerPhone">رقم الهاتف</label>
+  <input
+    type="tel"
+    id="customerPhone"
+    placeholder="أدخلي رقم هاتفك"
+  >
+
+  <label for="deliveryAddress">عنوان التوصيل</label>
+  <textarea
+    id="deliveryAddress"
+    placeholder="أدخلي عنوان التوصيل بالتفصيل"
+  ></textarea>
+</div>
+
     <button class="pay-btn" onclick="confirmOrder()" data-i18n="pay_cta">ادفع الآن</button>
   </div>
 </section>
