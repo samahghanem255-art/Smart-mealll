@@ -354,3 +354,23 @@ function updateCalorieProgress() {
 document.getElementById('cartModal').addEventListener('click', function(e) {
   if (e.target === this) closeCart();
 });
+// حفظ الطلب في قاعدة بيانات Supabase
+async function saveOrderToDatabase(orderData) {
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('orders')
+      .insert([orderData])
+      .select();
+    if (error) {
+      console.error('خطأ في حفظ الطلب:', error.message);
+      alert('تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.');
+      return false;
+    }
+    console.log('تم حفظ الطلب بنجاح:', data);
+    return true;
+  } catch (error) {
+    console.error('حدث خطأ:', error);
+    alert('حدث خطأ أثناء حفظ الطلب.');
+    return false;
+  }
+}
