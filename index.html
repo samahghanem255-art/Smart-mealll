@@ -383,5 +383,38 @@
     </div>
   </div>
 </div>
+<!-- ===== Cart Modal ===== -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCart()">✕</button>
+    <h3 data-i18n="cart_title">🛒 سلة المشتريات</h3>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer">
+      <p><span data-i18n="cart_total">المجموع:</span> <strong id="cartTotal">0</strong> <span data-i18n="currency">دج</span></p>
+      <p>🔥 <span data-i18n="cart_cal_total">إجمالي السعرات:</span> <strong id="cartCalTotal">0</strong> kcal</p>
+      <button class="pay-btn" onclick="confirmOrder()" data-i18n="cart_confirm">تأكيد الطلب</button>
+    </div>
+  </div>
+</div>
 
+<script src="script.js"></script>
+
+<script>
+async function confirmOrder(){
+  const nom = document.getElementById('customerName')?.value.trim();
+  const telephone = document.getElementById('customerPhone')?.value.trim();
+  const adresse = document.getElementById('deliveryAddress')?.value.trim();
+  const prix = parseInt(document.getElementById('cartTotal')?.innerText || '0') || 0;
+  if(!nom || !telephone){ alert('ادخل الاسم والهاتف'); return; }
+  const now = new Date();
+  const date_commande = now.toISOString().split('T')[0];
+  const heure = now.toLocaleTimeString('fr-DZ', {hour:'2-digit', minute:'2-digit'});
+  const { error } = await window.supabaseClient.from('meal_orders').insert([{ nom, telephone, adresse, prix, date_commande, heure }]);
+  if(error){ alert('خطأ: '+error.message); }
+  else{ alert('✅ تم الطلب'); if(typeof closeCart==='function') closeCart(); }
+}
+</script>
+
+</body>
+</html>
 
