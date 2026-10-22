@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Meal | منصة الوجبات الذكية</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.supabaseClient = window.supabase.createClient(
+'https://xvghguxdgezhiowswvsd.supabase.co',
+'sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG'
+);
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+<div class="logo">
+<img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg" alt="Smart Meal">
+<span>Smart Meal</span>
+</div>
+<ul class="nav-links">
+<li><a href="#home">الرئيسية</a></li>
+<li><a href="#menu">قائمة الطعام</a></li>
+<li><a href="#calories">السعرات</a></li>
+<li><a href="#health">توصيات صحية</a></li>
+<li><a href="#payment">الدفع</a></li>
+<li><a href="#contact">تواصل</a></li>
+</ul>
+<div class="nav-actions">
+<button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+<div class="lang-switcher">
+<button class="lang-btn active" onclick="setLang('ar')">AR</button>
+<button class="lang-btn" onclick="setLang('fr')">FR</button>
+<button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
+<a href="https://wa.me/213671070943" target="_blank" class="icon-btn">💬</a>
+<a href="tel:+213671070943" class="icon-btn">📞</a>
+</div>
+</header>
+
+<section id="home" class="hero">
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<div class="hero-badge">🌿 وجبات طازجة يومياً</div>
+<h1>Smart Meal</h1>
+<p>اختيارات صحية • توصيات ذكية • توصيل سريع</p>
+<a href="#menu" class="main-btn">ابدأ الطلب</a>
+</div>
+</section>
+
+<section id="menu" class="section">
+<div class="section-header">
+<h2>🍽️ قائمة الطعام</h2>
+<p class="section-sub">اختر من أشهى الوجبات المحضّرة بعناية</p>
+</div>
+<div class="filter-tabs">
+<button class="filter-btn active" onclick="filterMenu('all')">الكل</button>
+<button class="filter-btn" onclick="filterMenu('grills')">مشويات</button>
+<button class="filter-btn" onclick="filterMenu('rice')">أرز</button>
+<button class="filter-btn" onclick="filterMenu('pasta')">باستا</button>
+<button class="filter-btn" onclick="filterMenu('salads')">سلطات</button>
+<button class="filter-btn" onclick="filterMenu('drinks')">مشروبات</button>
+</div>
+<div class="cards" id="menuCards">
+<div class="card" data-category="grills">
+<div class="card-badge healthy-badge">صحي</div>
+<div class="cal-tag">🔥 سعرات: 320 kcal</div>
+<img src="https://i.ibb.co/yF0fngXw/IMG-1631.jpg" alt="دجاج مشوي">
+<div class="card-body">
+<h3>دجاج مشوي</h3>
+<p class="price">450 دج</p>
+<button onclick="addToCart('دجاج مشوي',450,320)">أضف للسلة</button>
+</div>
+</div>
+<div class="card" data-category="rice">
+<div class="cal-tag">🔥 سعرات: 480 kcal</div>
+<img src="https://i.ibb.co/27sqWTFn/IMG-1630.jpg" alt="وجبة أرز">
+<div class="card-body">
+<h3>وجبة أرز</h3>
+<p class="price">450 دج</p>
+<button onclick="addToCart('وجبة أرز',450,480)">أضف للسلة</button>
+</div>
+</div>
+<div class="card" data-category="pasta">
+<div class="cal-tag">🔥 سعرات: 550 kcal</div>
+<img src="https://i.ibb.co/xScPBgxw/IMG-1629.jpg" alt="باستا">
+<div class="card-body">
+<h3>باستا بالدجاج</h3>
+<p class="price">450 دج</p>
+<button onclick="addToCart('باستا بالدجاج',450,550)">أضف للسلة</button>
+</div>
+</div>
+</div>
+</section>
+
+<section id="payment" class="section light">
+<div class="section-header">
+<h2>💳 الدفع الإلكتروني</h2>
+<p class="section-sub">دفع آمن وسريع</p>
+</div>
+<div class="payment-box">
+<div class="customer-info">
+<label>اسم الزبون</label>
+<input type="text" id="customerName" placeholder="أدخلي اسمك">
+<label>رقم الهاتف</label>
+<input type="tel" id="customerPhone" placeholder="أدخلي رقم هاتفك">
+<label>عنوان التوصيل</label>
+<textarea id="deliveryAddress" placeholder="أدخلي عنوان التوصيل"></textarea>
+</div>
+<button class="pay-btn" onclick="confirmOrder()">ادفع الآن</button>
+</div>
+</section>
+
+<section id="contact" class="section">
+<div class="section-header">
+<h2>📍 تواصل معنا – سكيكدة</h2>
+</div>
+<iframe src="https://www.google.com/maps?q=Skikda,Algeria&output=embed" width="100%" height="300" style="border:0;border-radius:20px;" loading="lazy"></iframe>
+</section>
+
+<footer>
+<div class="footer-inner">
+<div class="footer-logo">
+<img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg" alt="Smart Meal">
+<span>Smart Meal</span>
+</div>
+<p>© 2026 Smart Meal – جميع الحقوق محفوظة</p>
+</div>
+</footer>
+
+<!-- السلة مرة واحدة فقط -->
+<div class="modal-overlay" id="cartModal">
+<div class="modal">
+<button class="modal-close" onclick="closeCart()">✕</button>
+<h3>🛒 سلة المشتريات</h3>
+<div id="cartItems" class="cart-items"></div>
+<div class="cart-footer">
+<p>المجموع: <strong id="cartTotal">0</strong> دج</p>
+<p>🔥 إجمالي السعرات: <strong id="cartCalTotal">0</strong> kcal</p>
+<button class="pay-btn" onclick="confirmOrder()">تأكيد الطلب</button>
+</div>
+</div>
+</div>
+
+<script src="script.js"></script>
+<script>
+async function confirmOrder(){
+const nom = document.getElementById('customerName')?.value.trim();
+const telephone = document.getElementById('customerPhone')?.value.trim();
+const adresse = document.getElementById('deliveryAddress')?.value.trim();
+const prix = parseInt(document.getElementById('cartTotal')?.innerText || '0') || 0;
+if(!nom || !telephone){ alert('ادخل الاسم والهاتف'); return; }
+const now = new Date();
+const date_commande = now.toISOString().split('T')[0];
+const heure = now.toLocaleTimeString('fr-DZ', {hour:'2-digit', minute:'2-digit'});
+const { error } = await window.supabaseClient.from('meal_orders').insert([{ nom, telephone, adresse, prix, date_commande, heure }]);
+if(error){ alert('خطأ: '+error.message); }
+else{ alert('✅ تم الطلب'); if(typeof closeCart==='function') closeCart(); }
+}
+</script>
+
+</body>
+</html>
