@@ -506,48 +506,16 @@ function updateCalStatus(totalCal) {
   document.getElementById('calAdvice').textContent = totalCal > dailyCalorieGoal ? M('over') : M('good');
 }
 
-/* ================= تأكيد الطلب + حفظه في قاعدة البيانات ================= */
-window.confirmOrder = async function () {
-  const nom = document.getElementById('customerName').value.trim();
-  const tel = document.getElementById('customerPhone').value.trim();
-  const adr = document.getElementById('deliveryAddress').value.trim();
-
-  if (cart.length === 0) { alert(M('empty')); return; }
-  if (!nom || !tel)      { alert(M('need'));  return; }
-  if (!/^[+\d][\d\s-]{7,}$/.test(tel)) { alert(M('phone')); return; }
-
-  const prix = cart.reduce((s, i) => s + i.price, 0);
-  const items = cart.map(i => i.name).join('، ');
-  const now = new Date();
-  const btn = document.getElementById('confirmBtn');
-  const oldTxt = btn.textContent;
-  btn.disabled = true; btn.textContent = M('sending');
-
-  try {
-    const { error } = await supa.from('meal_orders').insert([{
-      nom,
-      telephone: tel,
-      adresse: adr,
-      articles: items,
-      prix,
-      date_commande: now.toISOString().split('T')[0],
-      heure: now.toLocaleTimeString('en-GB')
-    }]);
-    if (error) throw error;
-
-    const msg = `طلب Smart Meal\n${nom}\n${tel}\n${adr}\n${items}\n${prix} دج`;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-    alert(M('ok'));
-    cart = []; renderCart(); closeCart();
-    ['customerName','customerPhone','deliveryAddress'].forEach(id => document.getElementById(id).value = '');
-    if (!window.open(url, '_blank')) location.href = url;
-  } catch (e) {
-    console.error('Supabase error:', e);
-    alert(M('fail') + '\n' + (e.message || ''));
-  } finally {
-    btn.disabled = false; btn.textContent = oldTxt;
-  }
-};
+/* ================= تأكيد الطلب + حفظه في قاعدة 
+await supa.from('meal_orders').insert([{
+  nom: nom,
+  telephone: tel,
+  adresse: adr,
+  articles: cart.map(i=>i.name).join(', '),
+  prix: parseInt(prix),
+  date_commande: new Date().toISOString().split('T')[0],
+  heure: new Date().toLocaleTimeString()
+}]);
 
 /* ================= تهيئة ================= */
 document.getElementById('cartModal').addEventListener('click', e => { if (e.target.id === 'cartModal') closeCart(); });
