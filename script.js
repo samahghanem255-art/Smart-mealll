@@ -330,103 +330,188 @@ function filterMenu(cat) {
     card.style.display = show ? 'block' : 'none';
   });
 }
+// ===================== GLOBAL VARS =====================
+let cart = [];
+let currentGoal = 'maintain';
+let dailyCalorieGoal = 0;
+let currentLang = localStorage.getItem('lang') || 'ar';
 
-// =====================
-//  CALORIE CALCULATOR
-// =====================
-function setGoal(btn, goal) {
-  currentGoal = goal;
-  document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+// Supabase
+const supa = supabase.createClient('https://xvghguxdgezhiowswvsd.supabase.co','sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG');
+
+// ===================== LANGUAGE =====================
+function setLang(lang){
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('data-lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  let btn = document.querySelector(`button[onclick="setLang('${lang}')"]`);
+  if(btn) btn.classList.add('active');
+  localStorage.setItem('lang', lang);
+}
+
+// ===================== MENU FILTER =====================
+function filterMenu(cat){
+  document.querySelectorAll('.card').forEach(c=>{
+    c.style.display = (cat==='all' || c.dataset.category===cat) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  let btn = document.querySelector(`button[onclick="filterMenu('${cat}')"]`);
+  if(btn) btn.classList.add('active');
+}
+
+// ===================== CART =====================
+function openCart(){
+  let m = document.getElementById('cartModal');
+  if(m){ m.style.display='flex'; m.classList.add('active'); }
+}
+function closeCart(){
+  let m = document.getElementById('cartModal');
+  if(m){ m.style.display='none'; m.classList.remove('active'); }
+}
+function addToCart(name,price,cal){
+  cart.push({name,price,cal:cal||0});
+  updateCart();
+  openCart();
+}
+function updateCart(){
+  let total = cart.reduce((s,i)=>s+i.price,0);
+  let totalCal = cart.reduce((s,i)=>s+i.cal,0);
+  document.getElementById('cartCount').innerText = cart.length;
+  let ct = document.getElementById('cartTotal');
+  if(ct) ct.innerText = total;
+  let cct = document.getElementById('cartCalTotal');
+  if(cct) cct.innerText = totalCal;
+  let ccd = document.getElementById('cartCalDisplay');
+  if(ccd) ccd.innerText = totalCal;
+  
+  let html = '';
+  cart.forEach((it,i)=>{
+    html += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee"><span>${it.name} - ${it.price}دج</span><span onclick="cart.splice(${i},1);updateCart()" style="color:red;cursor:pointer">✕</span></div>`;
+  });
+  document.getElementById('cartItems').innerHTML = html || '<p>السلة فارغة</p>';
+  updateCalorieProgress();
+}
+
+// ===================== CALORIE CALCULATOR - مصحح =====================
+function setGoal(btn, goal) { 
+  currentGoal = goal; 
+  document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active')); 
+  btn.classList.add('active'); 
 }
 
 function calculateCalories() {
-  const t = i18n[currentLang];
-  const age    = parseFloat(document.getElementById('calAge').value);
+  const age = parseFloat(document.getElementById('calAge').value);
   const weight = parseFloat(document.getElementById('calWeight').value);
   const height = parseFloat(document.getElementById('calHeight').value);
   const gender = document.getElementById('calGender').value;
   const factor = parseFloat(document.getElementById('calActivity').value);
 
-  if (!age || !weight || !height) { showToast('⚠️ ' + t.fill_fields); return; }
+  if (!age || !weight || !height) {
+    alert('⚠️ املأ كل الحقول');
+    return;
+  }
 
-  // Mifflin-St Jeor
-  let bmr = gender === 'male'
-    ? 10 * weight + 6.25 * height - 5 * age + 5
-    : 10 * weight + 6.25 * height - 5 * age - 161;
-
+  let bmr = gender === 'male' ? 10 * weight + 6.25 * height - 5 * age + 5 : 10 * weight + 6.25 * height - 5 * age - 161;
   let tdee = Math.round(bmr * factor);
-
   if (currentGoal === 'lose') tdee -= 500;
   if (currentGoal === 'gain') tdee += 300;
-
+  
   dailyCalorieGoal = tdee;
 
   const protein = Math.round((tdee * 0.30) / 4);
-  const carbs   = Math.round((tdee * 0.45) / 4);
-  const fat     = Math.round((tdee * 0.25) / 9);
+  const carbs = Math.round((tdee * 0.45) / 4);
+  const fat = Math.round((tdee * 0.25) / 9);
 
   document.getElementById('resultCalories').textContent = tdee;
-  document.getElementById('resultProtein').textContent  = protein + 'g';
-  document.getElementById('resultCarbs').textContent    = carbs   + 'g';
-  document.getElementById('resultFat').textContent      = fat     + 'g';
-
+  document.getElementById('resultProtein').textContent = protein + 'g';
+  document.getElementById('resultCarbs').textContent = carbs + 'g';
+  document.getElementById('resultFat').textContent = fat + 'g';
+  
   const result = document.getElementById('calResult');
-  result.style.display = 'block';
+  if(result) result.style.display = 'block';
 
-  // Animate ring
-  const circumference = 314;
-  const percent = Math.min(tdee / 3000, 1);
-  const offset  = circumference - circumference * percent;
-  setTimeout(() => {
-    document.getElementById('ringProgress').style.transition = 'stroke-dashoffset 1s ease';
-    document.getElementById('ringProgress').setAttribute('stroke-dashoffset', offset);
-  }, 100);
-
+  const ring = document.getElementById('ringProgress');
+  if(ring){
+    const circumference = 314;
+    const percent = Math.min(tdee / 3000, 1);
+    const offset = circumference - circumference * percent;
+    setTimeout(() => {
+      ring.style.transition = 'stroke-dashoffset 1s ease';
+      ring.setAttribute('stroke-dashoffset', offset);
+    }, 100);
+  }
+  
   updateCalorieProgress();
 }
 
 function updateCalorieProgress() {
   if (!dailyCalorieGoal) return;
-  const t = i18n[currentLang];
+  let totalCalories = cart.reduce((s,i)=>s+(i.cal||0),0);
   const percent = Math.min((totalCalories / dailyCalorieGoal) * 100, 100);
   const fill = document.getElementById('calProgress');
   const display = document.getElementById('cartCalDisplay');
-  const advice  = document.getElementById('calAdvice');
-
-  if (fill)    fill.style.width = percent + '%';
+  const advice = document.getElementById('calAdvice');
+  
+  if (fill) {
+    fill.style.width = percent + '%';
+    fill.style.background = percent > 100 ? '#ef4444' : percent > 80 ? '#f97316' : '#f4c542';
+  }
   if (display) display.textContent = totalCalories;
-  if (fill)    fill.style.background = percent > 100 ? '#ef4444' : percent > 80 ? '#f97316' : '#f4c542';
-
   if (advice) {
-    if (totalCalories === 0)          advice.textContent = '';
-    else if (totalCalories > dailyCalorieGoal) advice.textContent = t.advice_over;
-    else if (percent < 70)            advice.textContent = t.advice_under;
-    else                              advice.textContent = t.advice_ok;
+    if (totalCalories === 0) advice.textContent = '';
+    else if (totalCalories > dailyCalorieGoal) advice.textContent = '⚠️ تجاوزت هدفك';
+    else if (percent < 70) advice.textContent = '👍 يمكنك إضافة المزيد';
+    else advice.textContent = '✅ ممتاز! ضمن هدفك';
   }
 }
 
 // Close modal on overlay click
-document.getElementById('cartModal').addEventListener('click', function(e) {
-  if (e.target === this) closeCart();
-});
-// حفظ الطلب في قاعدة بيانات Supabase
-async function saveOrderToDatabase(orderData) {
-  try {
-    const { data, error } = await window.supabaseClient
-      .from('orders')
-      .insert([orderData])
-      .select();
-    if (error) {
-      console.error('خطأ في حفظ الطلب:', error.message);
-      alert('تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.');
-      return false;
+let modal = document.getElementById('cartModal');
+if(modal){
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) closeCart();
+  });
+}
+
+// ===================== SAVE ORDER =====================
+async function confirmOrder(){
+  let nom = document.getElementById('customerName')?.value.trim();
+  let telephone = document.getElementById('customerPhone')?.value.trim();
+  let adresse = document.getElementById('deliveryAddress')?.value.trim() || '';
+  let prixEl = document.getElementById('cartTotal');
+  let prix = prixEl ? parseInt(prixEl.innerText) : cart.reduce((s,i)=>s+i.price,0);
+  
+  if(cart.length===0){ alert('السلة فارغة'); return; }
+  if(!nom || !telephone){ alert('اكتب اسمك وهاتفك'); openCart(); return; }
+  
+  let d = new Date();
+  try{
+    let {data, error} = await supa.from('meal_orders').insert([{
+      nom, telephone, adresse, prix,
+      date_commande: d.toISOString().split('T')[0],
+      heure: d.toLocaleTimeString()
+    }]).select();
+    
+    if(error){
+      console.error(error);
+      alert('خطأ: '+error.message);
+      return;
     }
-    console.log('تم حفظ الطلب بنجاح:', data);
-    return true;
-  } catch (error) {
-    console.error('حدث خطأ:', error);
-    alert('حدث خطأ أثناء حفظ الطلب.');
-    return false;
+    alert('✅ تم الطلب بنجاح - '+prix+' دج');
+    cart = [];
+    updateCart();
+    closeCart();
+    if(document.getElementById('customerName')) document.getElementById('customerName').value='';
+    if(document.getElementById('customerPhone')) document.getElementById('customerPhone').value='';
+    if(document.getElementById('deliveryAddress')) document.getElementById('deliveryAddress').value='';
+  }catch(err){
+    console.error(err);
+    alert('حدث خطأ');
   }
 }
+
+// Init
+setLang(currentLang);
+console.log('Smart Meal JS Fixed');
