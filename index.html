@@ -381,24 +381,7 @@
       <p>🔥 <span data-i18n="cart_cal_total">إجمالي السعرات:</span> <strong id="cartCalTotal">0</strong> kcal</p>
       <button class="pay-btn" onclick="confirmOrder()" data-i18n="cart_confirm">تأكيد الطلب</button>
     </div>
-  </div>
-</div>
-<!-- ===== Cart Modal ===== -->
-<div class="modal-overlay" id="cartModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeCart()">✕</button>
-    <h3 data-i18n="cart_title">🛒 سلة المشتريات</h3>
-    <div id="cartItems" class="cart-items"></div>
-    <div class="cart-footer">
-      <p><span data-i18n="cart_total">المجموع:</span> <strong id="cartTotal">0</strong> <span data-i18n="currency">دج</span></p>
-      <p>🔥 <span data-i18n="cart_cal_total">إجمالي السعرات:</span> <strong id="cartCalTotal">0</strong> kcal</p>
-      <button class="pay-btn" onclick="confirmOrder()" data-i18n="cart_confirm">تأكيد الطلب</button>
-    </div>
-  </div>
-</div>
-
 <script src="script.js"></script>
-
 <script>
 async function confirmOrder(){
   const nom = document.getElementById('customerName')?.value.trim();
@@ -414,7 +397,6 @@ async function confirmOrder(){
   else{ alert('✅ تم الطلب'); if(typeof closeCart==='function') closeCart(); }
 }
 </script>
-
 </body>
 </html>
 
