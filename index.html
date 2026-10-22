@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Meal | منصة الوجبات الذكية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="navbar">
+<div class="logo"><img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg"><span>Smart Meal</span></div>
+<ul class="nav-links"><li><a href="#menu">قائمة الطعام</a></li><li><a href="#calories">السعرات</a></li></ul>
+<div class="nav-actions">
+<button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+<div class="lang-switcher">
+<button class="lang-btn active" onclick="setLang('ar')">AR</button>
+<button class="lang-btn" onclick="setLang('fr')">FR</button>
+<button class="lang-btn" onclick="setLang('en')">EN</button>
+</div></div>
+</header>
+
+<section id="menu" class="section">
+<div class="cards" id="menuCards">
+<div class="card" data-category="grills"><img src="https://i.ibb.co/yF0fngXw/IMG-1631.jpg"><div class="card-body"><h3>دجاج مشوي</h3><p class="price">450 دج</p><button onclick="addToCart('دجاج مشوي',450,320)">أضف للسلة</button></div></div>
+<div class="card" data-category="rice"><img src="https://i.ibb.co/27sqWTFn/IMG-1630.jpg"><div class="card-body"><h3>وجبة أرز</h3><p class="price">450 دج</p><button onclick="addToCart('وجبة أرز',450,480)">أضف للسلة</button></div></div>
+<div class="card" data-category="pasta"><img src="https://i.ibb.co/xScPBgxw/IMG-1629.jpg"><div class="card-body"><h3>باستا بالدجاج</h3><p class="price">450 دج</p><button onclick="addToCart('باستا بالدجاج',450,550)">أضف للسلة</button></div></div>
+</div>
+</section>
+
+<!-- MODAL مع الخانات -->
+<div class="modal-overlay" id="cartModal">
+<div class="modal" style="background:#fff;padding:20px;border-radius:15px;max-width:400px;width:90%;position:relative">
+<button onclick="closeCart()" style="position:absolute;top:10px;left:10px">✕</button>
+<h3>🛒 سلة المشتريات</h3>
+<div id="cartItems"></div>
+<hr>
+<p>المجموع: <strong id="cartTotal">0</strong> دج</p>
+<p>السعرات: <strong id="cartCalTotal">0</strong> kcal</p>
+
+<div style="margin-top:15px;background:#f9f9f9;padding:10px;border-radius:10px">
+<input id="customerName" placeholder="اسمك الكامل" style="width:100%;padding:10px;margin:5px 0;border:1px solid #ccc;border-radius:6px">
+<input id="customerPhone" placeholder="رقم الهاتف" style="width:100%;padding:10px;margin:5px 0;border:1px solid #ccc;border-radius:6px">
+<textarea id="deliveryAddress" placeholder="عنوان التوصيل - سكيكدة" style="width:100%;padding:10px;margin:5px 0;border:1px solid #ccc;border-radius:6px"></textarea>
+</div>
+
+<button onclick="confirmOrder()" style="width:100%;background:#111;color:#fff;padding:12px;border-radius:8px;margin-top:10px;border:0">تأكيد الطلب وادفع الآن</button>
+</div>
+</div>
+
+<script>
+const supa = supabase.createClient('https://xvghguxdgezhiowswvsd.supabase.co','sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG');
+let cart=[];
+let currentGoal='maintain';
+
+function setLang(lang){
+ document.documentElement.lang=lang;
+ document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+ document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+ let btn=document.querySelector(`[onclick="setLang('${lang}')"]`);
+ if(btn) btn.classList.add('active');
+ localStorage.setItem('lang',lang);
+}
+
+function filterMenu(cat){
+ document.querySelectorAll('.card').forEach(c=>{
+   c.style.display = (cat==='all' || c.dataset.category===cat) ? 'block' : 'none';
+ });
+ document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+}
+
+function openCart(){ document.getElementById('cartModal').classList.add('active'); document.getElementById('cartModal').style.display='flex'; }
+function closeCart(){ document.getElementById('cartModal').classList.remove('active'); document.getElementById('cartModal').style.display='none'; }
+
+function addToCart(name,price,cal){
+ cart.push({name,price,cal});
+ document.getElementById('cartCount').innerText=cart.length;
+ document.getElementById('cartTotal').innerText=cart.reduce((s,i)=>s+i.price,0);
+ document.getElementById('cartCalTotal').innerText=cart.reduce((s,i)=>s+i.cal,0);
+ let h=''; cart.forEach((it,i)=>h+=`<div style="display:flex;justify-content:space-between"><span>${it.name} ${it.price}دج</span><span onclick="cart.splice(${i},1);addToCart._refresh()" style="cursor:pointer;color:red">✕</span></div>`);
+ document.getElementById('cartItems').innerHTML=h||'<p>فارغة</p>';
+ openCart();
+}
+addToCart._refresh=()=>{ 
+ let tmp=[...cart]; cart=[]; 
+ document.getElementById('cartCount').innerText=tmp.length;
+ document.getElementById('cartTotal').innerText=tmp.reduce((s,i)=>s+i.price,0);
+ document.getElementById('cartCalTotal').innerText=tmp.reduce((s,i)=>s+i.cal,0);
+ cart=tmp;
+ let h=''; cart.forEach((it,i)=>h+=`<div style="display:flex;justify-content:space-between"><span>${it.name} ${it.price}دج</span><span onclick="cart.splice(${i},1);addToCart._refresh()" style="cursor:pointer;color:red">✕</span></div>`);
+ document.getElementById('cartItems').innerHTML=h;
+ if(cart.length===0) document.getElementById('cartItems').innerHTML='<p>فارغة</p>';
+};
+
+function setGoal(btn,g){ currentGoal=g; document.querySelectorAll('.goal-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+function calculateCalories(){
+ let age=+document.getElementById('calAge')?.value||25;
+ let w=+document.getElementById('calWeight')?.value||70;
+ let h=+document.getElementById('calHeight')?.value||170;
+ let gender=document.getElementById('calGender')?.value||'male';
+ let act=+document.getElementById('calActivity')?.value||1.55;
+ let bmr = gender==='male' ? 10*w+6.25*h-5*age+5 : 10*w+6.25*h-5*age-161;
+ let tdee = Math.round(bmr*act);
+ if(currentGoal==='lose') tdee-=500; if(currentGoal==='gain') tdee+=300;
+ document.getElementById('calResult').style.display='block';
+ document.getElementById('resultCalories').innerText=tdee;
+ document.getElementById('resultProtein').innerText=Math.round(w*1.8)+'g';
+ document.getElementById('resultCarbs').innerText=Math.round(tdee*0.5/4)+'g';
+ document.getElementById('resultFat').innerText=Math.round(tdee*0.25/9)+'g';
+}
+
+async function confirmOrder(){
+ let nom=document.getElementById('customerName').value.trim();
+ let telephone=document.getElementById('customerPhone').value.trim();
+ let adresse=document.getElementById('deliveryAddress').value.trim();
+ let prix=parseInt(document.getElementById('cartTotal').innerText)||0;
+ if(cart.length===0){ alert('السلة فارغة'); return; }
+ if(!nom || !telephone){ alert('من فضلك اكتب اسمك وهاتفك'); openCart(); return; }
+ let d=new Date();
+ let {error}=await supa.from('meal_orders').insert([{nom,telephone,adresse,prix,date_commande:d.toISOString().split('T')[0],heure:d.toLocaleTimeString()}]); 
+ if(error){ alert(error.message); } else { alert('✅ تم الطلب بنجاح - '+prix+' دج'); cart=[]; document.getElementById('cartCount').innerText='0'; closeCart(); document.getElementById('cartItems').innerHTML=''; document.getElementById('cartTotal').innerText='0'; document.getElementById('cartCalTotal').innerText='0'; }
+}
+
+// init
+document.addEventListener('click',e=>{ if(e.target.id==='cartModal') closeCart(); });
+setLang(localStorage.getItem('lang')||'ar');
+</script>
+<style>
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999}.modal-overlay.active{display:flex}
+</style>
+</body>
+</html>
