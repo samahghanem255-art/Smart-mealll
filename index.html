@@ -513,42 +513,42 @@ function updateCalStatus(totalCal) {
   if(!cart || cart.length==0){ alert('❌ السلة فارغة'); return; }
   if(!nom || !tel){ alert('❌ اكمل البيانات'); return; }
   var items = cart.map(i=>i.name).join(' + ');
-  
-  var SUPA_URL = "https://qdknzgbpipbmghsmdjwj.supabase.com";
-  var SUPA_KEY = "sb_publishable__zunCTxVSFeSrWMVFQvJXw_Co45RocM";
 
-  fetch(SUPA_URL+"/rest/v1/meal_orders", {
-    method:"POST",
-    headers:{
-      apikey: SUPA_KEY, 
-      Authorization: "Bearer "+SUPA_KEY, 
-      "Content-Type":"application/json",
-      "Prefer":"return=minimal"
-    },
-    body: JSON.stringify({
-      nom: nom, 
-      telephone: tel, 
-      adresse: adr, 
-      articles: items, 
-      prix: parseInt(prix)||0, 
-      date_commande: new Date().toISOString().split('T')[0], 
+  // الحفظ في Supabase بالطريقة الرسمية
+  try {
+    var supaClient = supabase.createClient(
+      "https://qdknzgbpipbmghsmdjwj.supabase.com",
+      "sb_publishable__zunCTxVSFeSrWMVFQvJXw_Co45RocM"
+    );
+    
+    supaClient.from('meal_orders').insert([{
+      nom: nom,
+      telephone: tel,
+      adresse: adr,
+      articles: items,
+      prix: parseInt(prix)||0,
+      date_commande: new Date().toISOString().split('T')[0],
       heure: new Date().toLocaleTimeString()
-    })
-  }).then(r=>{ 
-    console.log('DB status:', r.status);
-    if(r.ok){
-      console.log('✅ تم الحفظ في قاعدة البيانات');
-    } else {
-      r.text().then(t=>{ console.log('DB error:', t); alert('خطأ قاعدة: '+t); });
-    }
-  }).catch(e=>console.log('Fetch error', e));
+    }]).then(res=>{
+      console.log('Supabase result:', res);
+      if(res.error){
+        alert('❌ خطأ قاعدة البيانات: '+res.error.message);
+      } else {
+        console.log('✅ تم الحفظ!');
+      }
+    });
+  } catch(e){
+    console.log('Error:', e);
+    alert('خطأ: '+e.message);
+  }
 
-  alert('✅ تم تأكيد طلبك بنجاح يا '+nom+'!\nالمجموع: '+prix+' دج');
+  alert('✅ تم تأكيد طلبك يا '+nom+'!');
   var msg = encodeURIComponent('طلب Smart Meal\n👤 '+nom+'\n📞 '+tel+'\n📍 '+adr+'\n🍱 '+items+'\n💰 '+prix+' دج');
   window.open('https://wa.me/213671070943?text='+msg, '_blank');
-  cart=[]; document.getElementById('cartCount').innerText='0'; 
-  document.getElementById('cartItems').innerHTML='<p style=text-align:center>تم إرسال الطلب ✅</p>';
-  setTimeout(closeCart, 800);
+  cart=[]; 
+  var cc=document.getElementById('cartCount'); if(cc) cc.innerText='0';
+  var ci=document.getElementById('cartItems'); if(ci) ci.innerHTML='<p style=text-align:center>تم ✅</p>';
+  if(typeof closeCart==='function') closeCart();
 }
 
 /* ================= تهيئة ================= */
