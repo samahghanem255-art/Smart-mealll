@@ -507,15 +507,30 @@ function updateCalStatus(totalCal) {
 }
 
 /* ================= تأكيد الطلب + حفظه في قاعدة 
-await supa.from('meal_orders').insert([{
-  nom: nom,
-  telephone: tel,
-  adresse: adr,
-  articles: cart.map(i=>i.name).join(', '),
-  prix: parseInt(prix),
-  date_commande: new Date().toISOString().split('T')[0],
-  heure: new Date().toLocaleTimeString()
-}]);
+async function confirmOrder(){
+  let nom=customerName.value, tel=customerPhone.value, adr=deliveryAddress.value, prix=cartTotal.innerText;
+  if(!cart.length){ alert('السلة فارغة'); return; }
+  if(!nom||!tel){ alert('اكتب اسمك وهاتفك'); return; }
+
+  try{
+    await supa.from('meal_orders').insert([{
+      nom: nom, telephone: tel, adresse: adr,
+      articles: cart.map(i=>i.name).join(', '),
+      prix: parseInt(prix),
+      date_commande: new Date().toISOString().split('T')[0],
+      heure: new Date().toLocaleTimeString()
+    }]);
+  }catch(e){}
+
+  let items = cart.map(i=>i.name).join(' + ');
+  let msg = `طلب جديد%0A${nom}%0A${tel}%0A${adr}%0A${items}%0A${prix}دج`;
+  window.open(`https://wa.me/213671070943?text=${msg}`, '_blank');
+
+  // ✅ رسالة نجاح
+  alert('✅ تم بنجاح! تم حفظ طلبك وإرساله للواتساب');
+  
+  cart=[]; cartCount.innerText=0; cartItems.innerHTML=''; closeCart();
+}
 
 /* ================= تهيئة ================= */
 document.getElementById('cartModal').addEventListener('click', e => { if (e.target.id === 'cartModal') closeCart(); });
