@@ -505,7 +505,7 @@ function updateCalStatus(totalCal) {
   if (ring) ring.style.strokeDashoffset = 314 - (314 * pct / 100);
   document.getElementById('calAdvice').textContent = totalCal > dailyCalorieGoal ? M('over') : M('good');
 }
-  function confirmOrder(){
+  async function confirmOrder(){
   var nom = document.getElementById('customerName')?.value?.trim() || '';
   var tel = document.getElementById('customerPhone')?.value?.trim() || '';
   var adr = document.getElementById('deliveryAddress')?.value?.trim() || '';
@@ -514,41 +514,45 @@ function updateCalStatus(totalCal) {
   if(!nom || !tel){ alert('❌ اكمل البيانات'); return; }
   var items = cart.map(i=>i.name).join(' + ');
 
-  // الحفظ في Supabase بالطريقة الرسمية
-  try {
-    var supaClient = supabase.createClient(
-      "https://qdknzgbpipbmghsmdjwj.supabase.com",
-      "sb_publishable__zunCTxVSFeSrWMVFQvJXw_Co45RocM"
-    );
-    
-    supaClient.from('meal_orders').insert([{
-      nom: nom,
-      telephone: tel,
-      adresse: adr,
-      articles: items,
-      prix: parseInt(prix)||0,
-      date_commande: new Date().toISOString().split('T')[0],
-      heure: new Date().toLocaleTimeString()
-    }]).then(res=>{
-      console.log('Supabase result:', res);
-      if(res.error){
-        alert('❌ خطأ قاعدة البيانات: '+res.error.message);
-      } else {
-        console.log('✅ تم الحفظ!');
-      }
+  var SUPA_URL = "https://qdknzgbpipbmghsmdjwj.supabase.com";
+  var SUPA_KEY = "sb_publishable__zunCTxVSFeSrWMVFQvJXw_Co45RocM";
+
+  try{
+    var res = await fetch(SUPA_URL+"/rest/v1/meal_orders", {
+      method:"POST",
+      headers:{
+        apikey: SUPA_KEY,
+        Authorization: "Bearer "+SUPA_KEY,
+        "Content-Type":"application/json",
+        "Prefer":"return=minimal"
+      },
+      body: JSON.stringify({
+        nom: nom,
+        telephone: tel,
+        adresse: adr,
+        articles: items,
+        prix: parseInt(prix)||0
+      })
     });
-  } catch(e){
-    console.log('Error:', e);
-    alert('خطأ: '+e.message);
+    console.log("DB STATUS:", res.status);
+    if(!res.ok){
+      var txt = await res.text();
+      console.log("DB ERROR:", txt);
+      alert("خطأ DB: "+txt);
+    } else {
+      console.log("✅ تم الحفظ في Supabase");
+    }
+  }catch(e){
+    console.log("Fetch error:", e);
   }
 
   alert('✅ تم تأكيد طلبك يا '+nom+'!');
   var msg = encodeURIComponent('طلب Smart Meal\n👤 '+nom+'\n📞 '+tel+'\n📍 '+adr+'\n🍱 '+items+'\n💰 '+prix+' دج');
   window.open('https://wa.me/213671070943?text='+msg, '_blank');
   cart=[]; 
-  var cc=document.getElementById('cartCount'); if(cc) cc.innerText='0';
-  var ci=document.getElementById('cartItems'); if(ci) ci.innerHTML='<p style=text-align:center>تم ✅</p>';
-  if(typeof closeCart==='function') closeCart();
+  document.getElementById('cartCount').innerText='0';
+  document.getElementById('cartItems').innerHTML='<p style=text-align:center>تم ✅</p>';
+  closeCart();
 }
 
 /* ================= تهيئة ================= */
