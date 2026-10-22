@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Meal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.supabaseClient = supabase.createClient('https://xvghguxdgezhiowswvsd.supabase.co','sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG');
+</script>
+<link rel="stylesheet" href="style.css">
+<style>
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;padding:20px;border-radius:12px;min-width:300px;max-width:90%}
+.cart-items p{margin:5px 0}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+<div class="logo"><span>Smart Meal</span></div>
+<div class="nav-actions">
+<button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+<button onclick="setLang('ar')">AR</button>
+<button onclick="setLang('fr')">FR</button>
+<button onclick="setLang('en')">EN</button>
+</div>
+</header>
+
+<section id="menu" class="section">
+<h2>🍽️ قائمة الطعام</h2>
+<div class="cards">
+<div class="card"><h3>دجاج مشوي</h3><p>450 دج - 320 kcal</p><button onclick="addToCart('دجاج مشوي',450,320)">أضف للسلة</button></div>
+<div class="card"><h3>وجبة أرز</h3><p>450 دج - 480 kcal</p><button onclick="addToCart('وجبة أرز',450,480)">أضف للسلة</button></div>
+<div class="card"><h3>باستا</h3><p>450 دج - 550 kcal</p><button onclick="addToCart('باستا',450,550)">أضف للسلة</button></div>
+</div>
+</section>
+
+<section id="payment" class="section light">
+<h2>💳 الدفع</h2>
+<input type="text" id="customerName" placeholder="اسمك">
+<input type="tel" id="customerPhone" placeholder="هاتفك">
+<textarea id="deliveryAddress" placeholder="عنوانك"></textarea>
+<button onclick="confirmOrder()">ادفع الآن</button>
+</section>
+
+<div class="modal-overlay" id="cartModal">
+<div class="modal">
+<button onclick="closeCart()">✕</button>
+<h3>🛒 سلة المشتريات</h3>
+<div id="cartItems"></div>
+<p>المجموع: <strong id="cartTotal">0</strong> دج</p>
+<p>سعرات: <strong id="cartCalTotal">0</strong> kcal</p>
+<button onclick="confirmOrder()">تأكيد الطلب</button>
+</div>
+</div>
+
+<script>
+// كل الأزرار هنا - لا نحتاج script.js
+let cart=[];
+function openCart(){document.getElementById('cartModal').classList.add('active')}
+function closeCart(){document.getElementById('cartModal').classList.remove('active')}
+function setLang(l){document.documentElement.lang=l; alert('اللغة: '+l)}
+function addToCart(name,price,cal){
+cart.push({name,price,cal});
+let total=cart.reduce((s,i)=>s+i.price,0);
+let calT=cart.reduce((s,i)=>s+i.cal,0);
+document.getElementById('cartCount').innerText=cart.length;
+document.getElementById('cartTotal').innerText=total;
+document.getElementById('cartCalTotal').innerText=calT;
+let h='';
+cart.forEach(it=>{h+=`<p>${it.name} - ${it.price} دج</p>`});
+document.getElementById('cartItems').innerHTML=h||'فارغة';
+openCart();
+}
+async function confirmOrder(){
+const nom=document.getElementById('customerName').value.trim();
+const telephone=document.getElementById('customerPhone').value.trim();
+const adresse=document.getElementById('deliveryAddress').value.trim();
+const prix=parseInt(document.getElementById('cartTotal').innerText||'0')||0;
+if(!nom||!telephone){alert('ادخل الاسم والهاتف');return;}
+const now=new Date();
+const date_commande=now.toISOString().split('T')[0];
+const heure=now.toLocaleTimeString('fr-DZ',{hour:'2-digit',minute:'2-digit'});
+const {error}=await window.supabaseClient.from('meal_orders').insert([{nom,telephone,adresse,prix,date_commande,heure}]);
+if(error){alert('خطأ: '+error.message);}
+else{alert('✅ تم الطلب');cart=[];document.getElementById('cartCount').innerText='0';closeCart();}
+}
+</script>
+</body>
+</html>
