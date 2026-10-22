@@ -507,38 +507,53 @@ function updateCalStatus(totalCal) {
 }
 
 /* ================= تأكيد الطلب + حفظه في قاعدة 
-async function confirmOrder(){
-  let nom = customerName.value.trim();
-  let tel = customerPhone.value.trim();
-  let adr = deliveryAddress.value.trim();
-  let prix = parseInt(cartTotal.innerText)||0;
-  let items = cart.map(i=>i.name).join(', ');
-
-  if(!cart.length){ alert('السلة فارغة'); return; }
-  if(!nom||!tel){ alert('الاسم والهاتف مطلوب'); return; }
-
-  // حفظ في قاعدة البيانات مع انتظار النتيجة
-  let { data, error } = await supa.from('meal_orders').insert([{
-    nom: nom,
-    telephone: tel,
-    adresse: adr,
-    articles: items,
-    prix: prix,
-    date_commande: new Date().toISOString().split('T')[0],
-    heure: new Date().toLocaleTimeString()
-  }]).select();
-
-  if(error){
-    console.log(error);
-    alert('⚠️ خطأ في الحفظ: '+error.message+'\nسيتم الإرسال للواتساب فقط');
-  } else {
-    alert('✅ تم حفظ طلبك في قاعدة البيانات بنجاح! رقم الطلب: '+data[0].id);
+function confirmOrder(){
+  // قراءة البيانات بطريقة آمنة
+  var nomEl = document.getElementById('customerName');
+  var telEl = document.getElementById('customerPhone');
+  var adrEl = document.getElementById('deliveryAddress');
+  var totalEl = document.getElementById('cartTotal');
+  
+  var nom = nomEl ? nomEl.value.trim() : '';
+  var tel = telEl ? telEl.value.trim() : '';
+  var adr = adrEl ? adrEl.value.trim() : '';
+  var prix = totalEl ? totalEl.innerText : '0';
+  
+  if(typeof cart === 'undefined' || cart.length===0){
+    alert('❌ السلة فارغة - أضف وجبة أولا');
+    return;
   }
+  if(!nom){ alert('❌ اكتب اسمك'); return; }
+  if(!tel){ alert('❌ اكتب رقم هاتفك'); return; }
 
-  let msg = `طلب Smart Meal%0A👤 ${nom}%0A📞 ${tel}%0A📍 ${adr}%0A🍱 ${items}%0A💰 ${prix} دج`;
-  window.open(`https://wa.me/213671070943?text=${msg}`, '_blank');
+  var items = '';
+  try{ items = cart.map(function(i){return i.name}).join(' + '); }catch(e){ items='وجبات'; }
 
-  cart=[]; cartCount.innerText=0; cartTotal.innerText=0; cartItems.innerHTML=''; closeCart();
+  // حفظ في الخلفية - لا ننتظره حتى لا يعلق الزر
+  try{
+    if(typeof supa !== 'undefined' && supa){
+      supa.from('meal_orders').insert([{
+        nom: nom, telephone: tel, adresse: adr,
+        articles: items, prix: parseInt(prix)||0,
+        date_commande: new Date().toISOString().split('T')[0],
+        heure: new Date().toLocaleTimeString()
+      }]).then(function(res){
+        console.log('DB Saved', res);
+      }).catch(function(err){ console.log('DB Error', err); });
+    }
+  }catch(e){ console.log(e); }
+
+  // ✅ تأكيد فوري - هذا هو الأهم
+  alert('✅ تم تأكيد طلبك بنجاح!\nالاسم: '+nom+'\nالمجموع: '+prix+' دج\nسيتم تحويلك للواتساب الآن');
+
+  var msg = 'طلب جديد Smart Meal%0A👤 الاسم: '+encodeURIComponent(nom)+'%0A📞 الهاتف: '+tel+'%0A📍 العنوان: '+encodeURIComponent(adr)+'%0A🍱 الطلب: '+encodeURIComponent(items)+'%0A💰 المجموع: '+prix+' دج';
+  window.open('https://wa.me/213671070943?text='+msg, '_blank');
+
+  // تفريغ السلة
+  cart = [];
+  if(document.getElementById('cartCount')) document.getElementById('cartCount').innerText='0';
+  if(document.getElementById('cartItems')) document.getElementById('cartItems').innerHTML='<p style=text-align:center>تم إرسال الطلب ✅</p>';
+  if(typeof closeCart === 'function') setTimeout(closeCart, 1000);
 }
 
 /* ================= تهيئة ================= */
