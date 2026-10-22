@@ -355,28 +355,93 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-window.supabaseClient = supabase.createClient('https://xvghguxdgezhiowswvsd.supabase.co','sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG');
-let cart = [];
-function openCart(){ document.getElementById('cartModal')?.classList.add('active'); }
-function closeCart(){ document.getElementById('cartModal')?.classList.remove('active'); }
-function addToCart(name,price,cal){
- cart.push({name,price,cal});
- document.getElementById('cartCount').innerText = cart.length;
- document.getElementById('cartTotal').innerText = cart.reduce((s,i)=>s+i.price,0);
- document.getElementById('cartCalTotal').innerText = cart.reduce((s,i)=>s+i.cal,0);
- let h=''; cart.forEach(i=>h+=`<p>${i.name} - ${i.price} دج</p>`);
- document.getElementById('cartItems').innerHTML = h;
- openCart();
-}
-async function confirmOrder(){
- let nom = document.getElementById('customerName')?.value || '';
- let telephone = document.getElementById('customerPhone')?.value || '';
- let adresse = document.getElementById('deliveryAddress')?.value || '';
- let prix = parseInt(document.getElementById('cartTotal')?.innerText || '0');
- if(!nom || !telephone){ alert('اكتب اسمك وهاتفك'); return; }
- let d=new Date();
- let {error} = await window.supabaseClient.from('meal_orders').insert([{nom,telephone,adresse,prix,date_commande:d.toISOString().split('T')[0],heure:d.toLocaleTimeString()}]);
- if(error){ alert(error.message); } else { alert('✅ تم الطلب'); cart=[]; closeCart(); }
-}
-</script>
-</body>
+// إصلاح شامل - كل الأزرار
+const supa = supabase.createClient('https://xvghguxdgezhiowswvsd.supabase.co','sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG');
+let cart = []; let currentGoal = 'maintain';
+
+// 1. اللغة
+window.setLang = function(lang){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang==='ar' ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('data-lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  let btn = document.querySelector(`button[onclick="setLang('${lang}')"]`);
+  if(btn) btn.classList.add('active');
+  localStorage.setItem('lang', lang);
+};
+
+// 2. الفلتر
+window.filterMenu = function(cat){
+  document.querySelectorAll('.card').forEach(c=>{
+    if(cat==='all' || c.dataset.category===cat) c.style.display='block';
+    else c.style.display='none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  let b = document.querySelector(`button[onclick="filterMenu('${cat}')"]`);
+  if(b) b.classList.add('active');
+};
+
+// 3. السلة
+window.openCart = function(){
+  let m=document.getElementById('cartModal');
+  if(m){ m.style.display='flex'; m.classList.add('active'); }
+};
+window.closeCart = function(){
+  let m=document.getElementById('cartModal');
+  if(m){ m.style.display='none'; m.classList.remove('active'); }
+};
+window.addToCart = function(name,price,cal){
+  cart.push({name,price,cal:cal||0});
+  let total = cart.reduce((s,i)=>s+i.price,0);
+  let totalCal = cart.reduce((s,i)=>s+i.cal,0);
+  document.getElementById('cartCount').innerText = cart.length;
+  if(document.getElementById('cartTotal')) document.getElementById('cartTotal').innerText = total;
+  if(document.getElementById('cartCalTotal')) document.getElementById('cartCalTotal').innerText = totalCal;
+  let h=''; cart.forEach((it,idx)=>{
+    h+=`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee"><span>${it.name} ${it.price}دج</span><span onclick="cart.splice(${idx},1); window.addToCart._refresh()" style="color:red;cursor:pointer">✕</span></div>`;
+  });
+  document.getElementById('cartItems').innerHTML = h || '<p>السلة فارغة</p>';
+  openCart();
+};
+window.addToCart._refresh = function(){
+  let total = cart.reduce((s,i)=>s+i.price,0);
+  let totalCal = cart.reduce((s,i)=>s+i.cal,0);
+  document.getElementById('cartCount').innerText = cart.length;
+  if(document.getElementById('cartTotal')) document.getElementById('cartTotal').innerText = total;
+  if(document.getElementById('cartCalTotal')) document.getElementById('cartCalTotal').innerText = totalCal;
+  let h=''; cart.forEach((it,idx)=>{
+    h+=`<div style="display:flex;justify-content:space-between;padding:5px 0"><span>${it.name} ${it.price}دج</span><span onclick="cart.splice(${idx},1); window.addToCart._refresh()" style="color:red;cursor:pointer">✕</span></div>`;
+  });
+  document.getElementById('cartItems').innerHTML = h || '<p>السلة فارغة</p>';
+};
+
+// 4. حاسبة السعرات
+window.setGoal = function(btn,g){ currentGoal=g; document.querySelectorAll('.goal-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); };
+window.calculateCalories = function(){
+  let age = parseInt(document.getElementById('calAge')?.value)||25;
+  let w = parseInt(document.getElementById('calWeight')?.value)||70;
+  let h = parseInt(document.getElementById('calHeight')?.value)||170;
+  let gender = document.getElementById('calGender')?.value||'male';
+  let act = parseFloat(document.getElementById('calActivity')?.value)||1.55;
+  let bmr = gender==='male' ? 10*w+6.25*h-5*age+5 : 10*w+6.25*h-5*age-161;
+  let tdee = Math.round(bmr*act);
+  if(currentGoal==='lose') tdee-=500; if(currentGoal==='gain') tdee+=300;
+  document.getElementById('calResult').style.display='block';
+  document.getElementById('resultCalories').innerText = tdee;
+  if(document.getElementById('resultProtein')) document.getElementById('resultProtein').innerText = Math.round(w*1.8)+'g';
+  if(document.getElementById('resultCarbs')) document.getElementById('resultCarbs').innerText = Math.round(tdee*0.5/4)+'g';
+  if(document.getElementById('resultFat')) document.getElementById('resultFat').innerText = Math.round(tdee*0.25/9)+'g';
+};
+
+// 5. الدفع - ينشئ خانات اذا غير موجودة
+window.confirmOrder = async function(){
+  // اذا الخانات غير موجودة - انشئها داخل السلة
+  if(!document.getElementById('customerName')){
+    let box = document.createElement('div');
+    box.innerHTML = `<div style="background:#f5f5f5;padding:10px;border-radius:8px;margin:10px 0">
+      <input id="customerName" placeholder="اسمك *" style="width:100%;padding:10px;margin:5px 0">
+      <input id="customerPhone" placeholder="هاتفك *" style="width:100%;padding:10px;margin:5px 0">
+      <input id="deliveryAddress" placeholder="عنوانك - سكيكدة" style="width:100%;padding:10px;margin:5px 0">
+    </div>`;
+    document.querySelector('#cartModal .modal')?.appendChild(box);
+    alert('اكتب معلومات
