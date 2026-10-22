@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Meal | منصة الوجبات الذكية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  #cartModal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999}
+  #cartModal .modal{max-height:90vh;overflow-y:auto;position:relative}
+  .order-form{background:#f7f7f7;padding:10px;border-radius:10px;margin:10px 0}
+  .order-form input{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:8px;font-family:inherit;box-sizing:border-box}
+  .cart-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
+  .cart-row .rm{color:#d33;cursor:pointer;font-weight:700;padding:0 8px}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:30px;z-index:10000;opacity:0;pointer-events:none;transition:.3s}
+  #toast.show{opacity:1}
+  #calProgress{height:100%;width:0;background:var(--gold,#c9a227);border-radius:10px;transition:width .4s}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg" alt="Smart Meal">
+    <span>Smart Meal</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#home"     data-i18n="nav_home">الرئيسية</a></li>
+    <li><a href="#menu"     data-i18n="nav_menu">قائمة الطعام</a></li>
+    <li><a href="#calories" data-i18n="nav_calories">السعرات</a></li>
+    <li><a href="#health"   data-i18n="nav_health">توصيات صحية</a></li>
+    <li><a href="#payment"  data-i18n="nav_payment">الدفع</a></li>
+    <li><a href="#contact"  data-i18n="nav_contact">تواصل</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang-btn="ar" onclick="setLang('ar')">AR</button>
+      <button class="lang-btn" data-lang-btn="fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" data-lang-btn="en" onclick="setLang('en')">EN</button>
+    </div>
+    <a href="https://wa.me/213671070943" target="_blank" class="icon-btn">💬</a>
+    <a href="tel:+213671070943" class="icon-btn">📞</a>
+  </div>
+</header>
+
+<section id="home" class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge" data-i18n="hero_badge">🌿 وجبات طازجة يومياً</div>
+    <h1>Smart Meal</h1>
+    <p data-i18n="hero_sub">اختيارات صحية • توصيات ذكية • توصيل سريع</p>
+    <a href="#menu" class="main-btn" data-i18n="hero_cta">ابدأ الطلب</a>
+  </div>
+</section>
+
+<section id="menu" class="section">
+  <div class="section-header">
+    <h2 data-i18n="menu_title">🍽️ قائمة الطعام</h2>
+    <p class="section-sub" data-i18n="menu_sub">اختر من أشهى الوجبات المحضّرة بعناية</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="filter-btn active" data-cat="all"    onclick="filterMenu('all')"    data-i18n="filter_all">الكل</button>
+    <button class="filter-btn"        data-cat="grills" onclick="filterMenu('grills')" data-i18n="filter_grills">مشويات</button>
+    <button class="filter-btn"        data-cat="rice"   onclick="filterMenu('rice')"   data-i18n="filter_rice">أرز</button>
+    <button class="filter-btn"        data-cat="pasta"  onclick="filterMenu('pasta')"  data-i18n="filter_pasta">باستا</button>
+    <button class="filter-btn"        data-cat="salads" onclick="filterMenu('salads')" data-i18n="filter_salads">سلطات</button>
+    <button class="filter-btn"        data-cat="drinks" onclick="filterMenu('drinks')" data-i18n="filter_drinks">مشروبات</button>
+  </div>
+
+  <div class="cards" id="menuCards">
+
+    <div class="card" data-category="grills">
+      <div class="card-badge healthy-badge" data-i18n="badge_healthy">صحي</div>
+      <div class="cal-tag">🔥 <span data-i18n="cal_label">سعرات:</span> 320 kcal</div>
+      <img src="https://i.ibb.co/yF0fngXw/IMG-1631.jpg" alt="دجاج مشوي" loading="lazy">
+      <div class="card-body">
+        <h3 data-i18n="item_chicken">دجاج مشوي</h3>
+        <div class="nutrition-mini">
+          <span>🥩 30g <span data-i18n="n_protein">بروتين</span></span>
+          <span>🌾 25g <span data-i18n="n_carbs">كربوهيدرات</span></span>
+          <span>💧 8g <span data-i18n="n_fat">دهون</span></span>
+        </div>
+        <p class="price">450 <span data-i18n="currency">دج</span></p>
+        <button onclick="addToCart('دجاج مشوي',450,320)" data-i18n="add_cart">أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="card" data-category="rice">
+      <div class="cal-tag">🔥 <span data-i18n="cal_label">سعرات:</span> 480 kcal</div>
+      <img src="https://i.ibb.co/27sqWTFn/IMG-1630.jpg" alt="وجبة أرز" loading="lazy">
+      <div class="card-body">
+        <h3 data-i18n="item_rice">وجبة أرز</h3>
+        <div class="nutrition-mini">
+          <span>🥩 15g <span data-i18n="n_protein">بروتين</span></span>
+          <span>🌾 70g <span data-i18n="n_carbs">كربوهيدرات</span></span>
+          <span>💧 10g <span data-i18n="n_fat">دهون</span></span>
+        </div>
+        <p class="price">450 <span data-i18n="currency">دج</span></p>
+        <button onclick="addToCart('وجبة أرز',450,480)" data-i18n="add_cart">أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="card" data-category="pasta">
+      <div class="cal-tag">🔥 <span data-i18n="cal_label">سعرات:</span> 550 kcal</div>
+      <img src="https://i.ibb.co/xScPBgxw/IMG-1629.jpg" alt="باستا بالدجاج" loading="lazy">
+      <div class="card-body">
+        <h3 data-i18n="item_pasta">باستا بالدجاج</h3>
+        <div class="nutrition-mini">
+          <span>🥩 28g <span data-i18n="n_protein">بروتين</span></span>
+          <span>🌾 65g <span data-i18n="n_carbs">كربوهيدرات</span></span>
+          <span>💧 15g <span data-i18n="n_fat">دهون</span></span>
+        </div>
+        <p class="price">450 <span data-i18n="currency">دج</span></p>
+        <button onclick="addToCart('باستا بالدجاج',450,550)" data-i18n="add_cart">أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="card" data-category="salads">
+      <div class="card-badge healthy-badge" data-i18n="badge_healthy">صحي</div>
+      <div class="card-badge low-cal-badge" data-i18n="badge_low">منخفض السعرات</div>
+      <div class="cal-tag">🔥 <span data-i18n="cal_label">سعرات:</span> 120 kcal</div>
+      <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop" alt="سلطة خضراء" loading="lazy">
+      <div class="card-body">
+        <h3 data-i18n="item_salad">سلطة خضراء</h3>
+        <div class="nutrition-mini">
+          <span>🥩 5g <span data-i18n="n_protein">بروتين</span></span>
+          <span>🌾 12g <span data-i18n="n_carbs">كربوهيدرات</span></span>
+          <span>💧 6g <span data-i18n="n_fat">دهون</span></span>
+        </div>
+        <p class="price">250 <span data-i18n="currency">دج</span></p>
+        <button onclick="addToCart('سلطة خضراء',250,120)" data-i18n="add_cart">أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="card" data-category="drinks">
+      <div class="card-badge healthy-badge" data-i18n="badge_healthy">صحي</div>
+      <div class="cal-tag">🔥 <span data-i18n="cal_label">سعرات:</span> 90 kcal</div>
+      <img src="https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400&h=250&fit=crop" alt="عصير طازج" loading="lazy">
+      <div class="card-body">
+        <h3 data-i18n="item_juice">عصير طازج</h3>
+        <div class="nutrition-mini">
+          <span>🥩 1g <span data-i18n="n_protein">بروتين</span></span>
+          <span>🌾 22g <span data-i18n="n_carbs">كربوهيدرات</span></span>
+          <span>💧 0g <span data-i18n="n_fat">دهون</span></span>
+        </div>
+        <p class="price">200 <span data-i18n="currency">دج</span></p>
+        <button onclick="addToCart('عصير طازج',200,90)" data-i18n="add_cart">أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="card" data-category="grills">
+      <div class="cal-tag">🔥 <span data-i18n="cal_label">سعرات:</span> 420 kcal</div>
+      <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=250&fit=crop" alt="مشوى لحم" loading="lazy">
+      <div class="card-body">
+        <h3 data-i18n="item_beef">مشوى لحم</h3>
+        <div class="nutrition-mini">
+          <span>🥩 38g <span data-i18n="n_protein">بروتين</span></span>
+          <span>🌾 10g <span data-i18n="n_carbs">كربوهيدرات</span></span>
+          <span>💧 20g <span data-i18n="n_fat">دهون</span></span>
+        </div>
+        <p class="price">650 <span data-i18n="currency">دج</span></p>
+        <button onclick="addToCart('مشوى لحم',650,420)" data-i18n="add_cart">أضف للسلة</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="calories" class="section light calories-section">
+  <div class="section-header">
+    <h2 data-i18n="cal_section_title">🔥 حاسبة السعرات الحرارية</h2>
+    <p class="section-sub" data-i18n="cal_section_sub">اعرف احتياجك اليومي واتحكّم في وجباتك</p>
+  </div>
+
+  <div class="cal-calculator">
+    <div class="cal-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label data-i18n="cal_age">العمر</label>
+          <input type="number" id="calAge" placeholder="25" min="10" max="100">
+        </div>
+        <div class="form-group">
+          <label data-i18n="cal_weight">الوزن (كغ)</label>
+          <input type="number" id="calWeight" placeholder="70" min="30" max="250">
+        </div>
+        <div class="form-group">
+          <label data-i18n="cal_height">الطول (سم)</label>
+          <input type="number" id="calHeight" placeholder="170" min="100" max="250">
+        </div>
+        <div class="form-group">
+          <label data-i18n="cal_gender">الجنس</label>
+          <select id="calGender">
+            <option value="male"   data-i18n="cal_male">ذكر</option>
+            <option value="female" data-i18n="cal_female">أنثى</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label data-i18n="cal_activity">مستوى النشاط</label>
+          <select id="calActivity">
+            <option value="1.2"   data-i18n="act_sedentary">خامل (بدون رياضة)</option>
+            <option value="1.375" data-i18n="act_light">خفيف (1-3 أيام/أسبوع)</option>
+            <option value="1.55"  data-i18n="act_moderate" selected>معتدل (3-5 أيام/أسبوع)</option>
+            <option value="1.725" data-i18n="act_active">نشيط (6-7 أيام/أسبوع)</option>
+            <option value="1.9"   data-i18n="act_veryactive">رياضي شديد</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label data-i18n="cal_goal">الهدف</label>
+          <div class="goal-buttons">
+            <button class="goal-btn active" onclick="setGoal(this,'maintain')" data-i18n="goal_maintain">الحفاظ على الوزن</button>
+            <button class="goal-btn"        onclick="setGoal(this,'lose')"     data-i18n="goal_lose">خسارة الوزن</button>
+            <button class="goal-btn"        onclick="setGoal(this,'gain')"     data-i18n="goal_gain">زيادة الكتلة</button>
+          </div>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calculateCalories()" data-i18n="calc_btn">احسب الآن 🔢</button>
+    </div>
+
+    <div class="cal-result" id="calResult" style="display:none">
+      <div class="result-header">
+        <h3 data-i18n="result_title">نتيجتك اليومية</h3>
+      </div>
+      <div class="result-ring">
+        <svg viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#eee" stroke-width="10"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--gold)" stroke-width="10"
+                  stroke-dasharray="314" stroke-dashoffset="314" id="ringProgress"
+                  stroke-linecap="round" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="ring-label">
+          <span id="resultCalories" class="cal-number">0</span>
+          <small data-i18n="kcal_day">سعرة/يوم</small>
+        </div>
+      </div>
+      <div class="macro-breakdown">
+        <div class="macro-item protein">
+          <span class="macro-icon">🥩</span>
+          <span class="macro-val" id="resultProtein">0g</span>
+          <span class="macro-name" data-i18n="n_protein">بروتين</span>
+        </div>
+        <div class="macro-item carbs">
+          <span class="macro-icon">🌾</span>
+          <span class="macro-val" id="resultCarbs">0g</span>
+          <span class="macro-name" data-i18n="n_carbs">كربوهيدرات</span>
+        </div>
+        <div class="macro-item fat">
+          <span class="macro-icon">💧</span>
+          <span class="macro-val" id="resultFat">0g</span>
+          <span class="macro-name" data-i18n="n_fat">دهون</span>
+        </div>
+      </div>
+      <div class="cart-cal-status" id="cartCalStatus">
+        <p>🛒 <span data-i18n="cart_consumed">سعرات سلتك الحالية:</span> <strong id="cartCalDisplay">0</strong> kcal</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="calProgress"></div>
+        </div>
+        <p id="calAdvice" class="cal-advice"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="health" class="section">
+  <div class="section-header">
+    <h2 data-i18n="health_title">🤖 توصيات صحية ذكية</h2>
+    <p class="section-sub" data-i18n="health_sub">نصائح مخصصة لنمط حياة أفضل</p>
+  </div>
+  <div class="health-grid">
+    <div class="health-card"><div class="health-icon">🥗</div><h4 data-i18n="h1_title">وجبات منخفضة السعرات</h4><p data-i18n="h1_desc">اختر وجباتنا الصحية التي تحتوي على أقل من 300 سعرة حرارية</p></div>
+    <div class="health-card"><div class="health-icon">💧</div><h4 data-i18n="h2_title">شرب كميات كافية من الماء</h4><p data-i18n="h2_desc">اشرب 8 أكواب يومياً لتحسين الهضم وتعزيز الطاقة</p></div>
+    <div class="health-card"><div class="health-icon">🥩</div><h4 data-i18n="h3_title">بروتين متوازن</h4><p data-i18n="h3_desc">تناول ما بين 1.2 – 2g من البروتين لكل كيلو من وزنك</p></div>
+    <div class="health-card"><div class="health-icon">🏃</div><h4 data-i18n="h4_title">ممارسة الرياضة</h4><p data-i18n="h4_desc">30 دقيقة يومياً تكفي للحفاظ على صحتك ورشاقتك</p></div>
+    <div class="health-card"><div class="health-icon">🌙</div><h4 data-i18n="h5_title">نوم كافٍ</h4><p data-i18n="h5_desc">النوم 7-8 ساعات يساعد على تنظيم الشهية وحرق الدهون</p></div>
+    <div class="health-card"><div class="health-icon">🥦</div><h4 data-i18n="h6_title">خضروات يومية</h4><p data-i18n="h6_desc">أضف حصتين من الخضروات لكل وجبة لتحصل على الألياف الكافية</p></div>
+  </div>
+</section>
+
+<section id="payment" class="section light">
+  <div class="section-header">
+    <h2 data-i18n="pay_title">💳 الدفع الإلكتروني</h2>
+    <p class="section-sub" data-i18n="pay_sub">دفع آمن وسريع عبر البطاقة الذهبية</p>
+  </div>
+  <div class="payment-box">
+    <div class="payment-icons">
+      <span class="pay-icon">💳</span><span class="pay-icon">📱</span><span class="pay-icon">🔒</span>
+    </div>
+    <p class="pay-desc" data-i18n="pay_desc">بياناتك محمية بتشفير SSL · دفع فوري آمن</p>
+    <button class="pay-btn" onclick="openCart()" data-i18n="pay_cta">ادفع الآن</button>
+  </div>
+</section>
+
+<section id="contact" class="section">
+  <div class="section-header">
+    <h2 data-i18n="contact_title">📍 تواصل معنا – سكيكدة</h2>
+    <p class="section-sub" data-i18n="contact_sub">نحن هنا لخدمتك في أي وقت</p>
+  </div>
+  <iframe src="https://www.google.com/maps?q=Skikda,Algeria&output=embed" width="100%" height="300"
+    style="border:0;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.15);" loading="lazy"></iframe>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <img src="https://i.ibb.co/gbNrm0sM/837abbaf-efb7-41d0-b6f4-50a9bc78de99.jpg" alt="Smart Meal">
+      <span>Smart Meal</span>
+    </div>
+    <p data-i18n="footer_copy">© 2026 Smart Meal – جميع الحقوق محفوظة</p>
+  </div>
+</footer>
+
+<!-- ===== السلة ===== -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCart()">✕</button>
+    <h3 data-i18n="cart_title">🛒 سلة المشتريات</h3>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="order-form">
+      <input id="customerName"    data-i18n-ph="ph_name"    placeholder="اسمك *" autocomplete="name">
+      <input id="customerPhone"   data-i18n-ph="ph_phone"   placeholder="هاتفك *" type="tel" autocomplete="tel">
+      <input id="deliveryAddress" data-i18n-ph="ph_address" placeholder="عنوانك - سكيكدة" autocomplete="street-address">
+    </div>
+    <div class="cart-footer">
+      <p><span data-i18n="cart_total">المجموع:</span> <strong id="cartTotal">0</strong> <span data-i18n="currency">دج</span></p>
+      <p>🔥 <span data-i18n="cart_cal_total">إجمالي السعرات:</span> <strong id="cartCalTotal">0</strong> kcal</p>
+      <button class="pay-btn" id="confirmBtn" onclick="confirmOrder()" data-i18n="cart_confirm">تأكيد الطلب</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ================= الإعدادات ================= */
+const SUPABASE_URL = 'https://xvghguxdgezhiowswvsd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG';
+const WHATSAPP_NUMBER = '213671070943';
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let cart = [];
+let currentGoal = 'maintain';
+let dailyCalorieGoal = 0;
+
+/* ================= الترجمة ================= */
+const AR = {}, AR_PH = {};
+document.querySelectorAll('[data-i18n]').forEach(el => { AR[el.dataset.i18n] ??= el.textContent; });
+document.querySelectorAll('[data-i18n-ph]').forEach(el => { AR_PH[el.dataset.i18nPh] = el.placeholder; });
+
+const I18N = {
+  fr: {
+    nav_home:'Accueil', nav_menu:'Menu', nav_calories:'Calories', nav_health:'Conseils santé', nav_payment:'Paiement', nav_contact:'Contact',
+    hero_badge:'🌿 Repas frais chaque jour', hero_sub:'Choix sains • Conseils intelligents • Livraison rapide', hero_cta:'Commander',
+    menu_title:'🍽️ Notre menu', menu_sub:'Choisissez parmi nos plats préparés avec soin',
+    filter_all:'Tout', filter_grills:'Grillades', filter_rice:'Riz', filter_pasta:'Pâtes', filter_salads:'Salades', filter_drinks:'Boissons',
+    badge_healthy:'Sain', badge_low:'Faible en calories', cal_label:'Calories :',
+    item_chicken:'Poulet grillé', item_rice:'Plat de riz', item_pasta:'Pâtes au poulet', item_salad:'Salade verte', item_juice:'Jus frais', item_beef:'Viande grillée',
+    n_protein:'protéines', n_carbs:'glucides', n_fat:'lipides', currency:'DA', add_cart:'Ajouter au panier',
+    cal_section_title:'🔥 Calculateur de calories', cal_section_sub:'Connaissez vos besoins quotidiens et maîtrisez vos repas',
+    cal_age:'Âge', cal_weight:'Poids (kg)', cal_height:'Taille (cm)', cal_gender:'Sexe', cal_male:'Homme', cal_female:'Femme',
+    cal_activity:"Niveau d'activité", act_sedentary:'Sédentaire (aucun sport)', act_light:'Léger (1-3 j/semaine)', act_moderate:'Modéré (3-5 j/semaine)', act_active:'Actif (6-7 j/semaine)', act_veryactive:'Sportif intense',
+    cal_goal:'Objectif', goal_maintain:'Maintenir le poids', goal_lose:'Perdre du poids', goal_gain:'Prendre de la masse',
+    calc_btn:'Calculer 🔢', result_title:'Votre résultat quotidien', kcal_day:'kcal/jour', cart_consumed:'Calories de votre panier :',
+    health_title:'🤖 Conseils santé intelligents', health_sub:'Des conseils pour un meilleur mode de vie',
+    h1_title:'Repas pauvres en calories', h1_desc:'Choisissez nos plats sains de moins de 300 calories',
+    h2_title:"Buvez assez d'eau", h2_desc:'8 verres par jour pour la digestion et l’énergie',
+    h3_title:'Protéines équilibrées', h3_desc:'Consommez 1,2 à 2 g de protéines par kg de poids',
+    h4_title:'Faites du sport', h4_desc:'30 minutes par jour suffisent pour rester en forme',
+    h5_title:'Sommeil suffisant', h5_desc:'7-8 heures aident à réguler l’appétit et brûler les graisses',
+    h6_title:'Légumes chaque jour', h6_desc:'Ajoutez 2 portions de légumes à chaque repas',
+    pay_title:'💳 Paiement en ligne', pay_sub:'Paiement sûr et rapide par carte Edahabia', pay_desc:'Vos données sont protégées par SSL · Paiement instantané', pay_cta:'Payer maintenant',
+    contact_title:'📍 Contactez-nous – Skikda', contact_sub:'Nous sommes là pour vous à tout moment',
+    footer_copy:'© 2026 Smart Meal – Tous droits réservés',
+    cart_title:'🛒 Panier', cart_total:'Total :', cart_cal_total:'Total calories :', cart_confirm:'Confirmer la commande'
+  },
+  en: {
+    nav_home:'Home', nav_menu:'Menu', nav_calories:'Calories', nav_health:'Health tips', nav_payment:'Payment', nav_contact:'Contact',
+    hero_badge:'🌿 Fresh meals daily', hero_sub:'Healthy choices • Smart tips • Fast delivery', hero_cta:'Order now',
+    menu_title:'🍽️ Our Menu', menu_sub:'Choose from our carefully prepared meals',
+    filter_all:'All', filter_grills:'Grills', filter_rice:'Rice', filter_pasta:'Pasta', filter_salads:'Salads', filter_drinks:'Drinks',
+    badge_healthy:'Healthy', badge_low:'Low calorie', cal_label:'Calories:',
+    item_chicken:'Grilled chicken', item_rice:'Rice meal', item_pasta:'Chicken pasta', item_salad:'Green salad', item_juice:'Fresh juice', item_beef:'Grilled beef',
+    n_protein:'protein', n_carbs:'carbs', n_fat:'fat', currency:'DZD', add_cart:'Add to cart',
+    cal_section_title:'🔥 Calorie Calculator', cal_section_sub:'Know your daily needs and control your meals',
+    cal_age:'Age', cal_weight:'Weight (kg)', cal_height:'Height (cm)', cal_gender:'Gender', cal_male:'Male', cal_female:'Female',
+    cal_activity:'Activity level', act_sedentary:'Sedentary (no exercise)', act_light:'Light (1-3 days/week)', act_moderate:'Moderate (3-5 days/week)', act_active:'Active (6-7 days/week)', act_veryactive:'Very active athlete',
+    cal_goal:'Goal', goal_maintain:'Maintain weight', goal_lose:'Lose weight', goal_gain:'Gain muscle',
+    calc_btn:'Calculate 🔢', result_title:'Your daily result', kcal_day:'kcal/day', cart_consumed:'Calories in your cart:',
+    health_title:'🤖 Smart Health Tips', health_sub:'Personalized advice for a better lifestyle',
+    h1_title:'Low-calorie meals', h1_desc:'Choose our healthy meals under 300 calories',
+    h2_title:'Drink enough water', h2_desc:'8 glasses a day improves digestion and energy',
+    h3_title:'Balanced protein', h3_desc:'Eat 1.2–2 g of protein per kg of body weight',
+    h4_title:'Stay active', h4_desc:'30 minutes a day is enough to stay fit',
+    h5_title:'Enough sleep', h5_desc:'7-8 hours helps regulate appetite and burn fat',
+    h6_title:'Daily vegetables', h6_desc:'Add 2 servings of vegetables to every meal',
+    pay_title:'💳 Online Payment', pay_sub:'Safe and fast payment with Edahabia card', pay_desc:'Your data is SSL-protected · Instant secure payment', pay_cta:'Pay now',
+    contact_title:'📍 Contact us – Skikda', contact_sub:'We are here for you anytime',
+    footer_copy:'© 2026 Smart Meal – All rights reserved',
+    cart_title:'🛒 Shopping Cart', cart_total:'Total:', cart_cal_total:'Total calories:', cart_confirm:'Confirm order'
+  }
+};
+const PH = {
+  fr:{ph_name:'Votre nom *', ph_phone:'Votre téléphone *', ph_address:'Votre adresse - Skikda'},
+  en:{ph_name:'Your name *', ph_phone:'Your phone *', ph_address:'Your address - Skikda'}
+};
+const MSG = {
+  ar:{empty:'السلة فارغة', need:'اكتب اسمك وهاتفك', phone:'رقم الهاتف غير صحيح', ok:'✅ تم تسجيل طلبك بنجاح!', fail:'تعذر حفظ الطلب، حاول مجدداً', added:'تمت الإضافة للسلة ✓', fill:'املأ العمر والوزن والطول', sending:'جاري الإرسال...', over:'تجاوزت احتياجك اليومي', good:'ضمن احتياجك اليومي'},
+  fr:{empty:'Panier vide', need:'Entrez votre nom et téléphone', phone:'Numéro de téléphone invalide', ok:'✅ Commande enregistrée !', fail:'Échec de l’enregistrement, réessayez', added:'Ajouté au panier ✓', fill:'Remplissez âge, poids et taille', sending:'Envoi...', over:'Vous dépassez votre besoin quotidien', good:'Dans votre besoin quotidien'},
+  en:{empty:'Cart is empty', need:'Enter your name and phone', phone:'Invalid phone number', ok:'✅ Order saved successfully!', fail:'Could not save order, try again', added:'Added to cart ✓', fill:'Fill in age, weight and height', sending:'Sending...', over:'You exceeded your daily need', good:'Within your daily need'}
+};
+const L = () => document.documentElement.lang || 'ar';
+const M = k => MSG[L()][k];
+
+window.setLang = function (lang) {
+  if (!['ar','fr','en'].includes(lang)) lang = 'ar';
+  const html = document.documentElement;
+  html.lang = lang; html.dir = lang === 'ar' ? 'rtl' : 'ltr'; html.setAttribute('data-lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    el.textContent = (lang === 'ar' ? AR[k] : I18N[lang][k]) ?? AR[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.dataset.i18nPh;
+    el.placeholder = (lang === 'ar' ? AR_PH[k] : PH[lang][k]) ?? AR_PH[k];
+  });
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.langBtn === lang));
+  try { localStorage.setItem('lang', lang); } catch (e) {}
+  renderCart();
+};
+
+/* ================= القائمة ================= */
+window.filterMenu = function (cat) {
+  document.querySelectorAll('#menuCards .card').forEach(c => {
+    c.style.display = (cat === 'all' || c.dataset.category === cat) ? '' : 'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+};
+
+/* ================= السلة ================= */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+window.openCart = function () {
+  const m = document.getElementById('cartModal');
+  m.style.display = 'flex'; m.classList.add('active');
+};
+window.closeCart = function () {
+  const m = document.getElementById('cartModal');
+  m.style.display = 'none'; m.classList.remove('active');
+};
+window.addToCart = function (name, price, cal) {
+  cart.push({ name, price: Number(price) || 0, cal: Number(cal) || 0 });
+  renderCart(); toast(M('added'));
+};
+window.removeFromCart = function (i) { cart.splice(i, 1); renderCart(); };
+
+function renderCart() {
+  const total = cart.reduce((s, i) => s + i.price, 0);
+  const totalCal = cart.reduce((s, i) => s + i.cal, 0);
+  const cur = (I18N[L()] || AR).currency ?? AR.currency;
+  document.getElementById('cartCount').textContent = cart.length;
+  document.getElementById('cartTotal').textContent = total;
+  document.getElementById('cartCalTotal').textContent = totalCal;
+  document.getElementById('cartItems').innerHTML = cart.length
+    ? cart.map((it, i) => `<div class="cart-row"><span>${it.name} — ${it.price} ${cur}</span><span class="rm" onclick="removeFromCart(${i})">✕</span></div>`).join('')
+    : `<p>${M('empty')}</p>`;
+  updateCalStatus(totalCal);
+}
+
+/* ================= حاسبة السعرات ================= */
+window.setGoal = function (btn, g) {
+  currentGoal = g;
+  document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+};
+window.calculateCalories = function () {
+  const age = +document.getElementById('calAge').value;
+  const w = +document.getElementById('calWeight').value;
+  const h = +document.getElementById('calHeight').value;
+  const g = document.getElementById('calGender').value;
+  const f = +document.getElementById('calActivity').value;
+  if (!age || !w || !h) { alert(M('fill')); return; }
+  const bmr = g === 'male' ? 10*w + 6.25*h - 5*age + 5 : 10*w + 6.25*h - 5*age - 161;
+  let tdee = Math.round(bmr * f);
+  if (currentGoal === 'lose') tdee -= 500;
+  if (currentGoal === 'gain') tdee += 300;
+  dailyCalorieGoal = tdee;
+  document.getElementById('resultCalories').textContent = tdee;
+  document.getElementById('resultProtein').textContent = Math.round(tdee * 0.30 / 4) + 'g';
+  document.getElementById('resultCarbs').textContent = Math.round(tdee * 0.45 / 4) + 'g';
+  document.getElementById('resultFat').textContent = Math.round(tdee * 0.25 / 9) + 'g';
+  document.getElementById('calResult').style.display = 'block';
+  updateCalStatus(cart.reduce((s, i) => s + i.cal, 0));
+};
+function updateCalStatus(totalCal) {
+  const d = document.getElementById('cartCalDisplay'); if (d) d.textContent = totalCal;
+  if (!dailyCalorieGoal) return;
+  const pct = Math.min(100, Math.round(totalCal / dailyCalorieGoal * 100));
+  document.getElementById('calProgress').style.width = pct + '%';
+  const ring = document.getElementById('ringProgress');
+  if (ring) ring.style.strokeDashoffset = 314 - (314 * pct / 100);
+  document.getElementById('calAdvice').textContent = totalCal > dailyCalorieGoal ? M('over') : M('good');
+}
+
+/* ================= تأكيد الطلب + حفظه في قاعدة البيانات ================= */
+window.confirmOrder = async function () {
+  const nom = document.getElementById('customerName').value.trim();
+  const tel = document.getElementById('customerPhone').value.trim();
+  const adr = document.getElementById('deliveryAddress').value.trim();
+
+  if (cart.length === 0) { alert(M('empty')); return; }
+  if (!nom || !tel)      { alert(M('need'));  return; }
+  if (!/^[+\d][\d\s-]{7,}$/.test(tel)) { alert(M('phone')); return; }
+
+  const prix = cart.reduce((s, i) => s + i.price, 0);
+  const items = cart.map(i => i.name).join('، ');
+  const now = new Date();
+  const btn = document.getElementById('confirmBtn');
+  const oldTxt = btn.textContent;
+  btn.disabled = true; btn.textContent = M('sending');
+
+  try {
+    const { error } = await supa.from('meal_orders').insert([{
+      nom,
+      telephone: tel,
+      adresse: adr,
+      articles: items,
+      prix,
+      date_commande: now.toISOString().split('T')[0],
+      heure: now.toLocaleTimeString('en-GB')
+    }]);
+    if (error) throw error;
+
+    const msg = `طلب Smart Meal\n${nom}\n${tel}\n${adr}\n${items}\n${prix} دج`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    alert(M('ok'));
+    cart = []; renderCart(); closeCart();
+    ['customerName','customerPhone','deliveryAddress'].forEach(id => document.getElementById(id).value = '');
+    if (!window.open(url, '_blank')) location.href = url;
+  } catch (e) {
+    console.error('Supabase error:', e);
+    alert(M('fail') + '\n' + (e.message || ''));
+  } finally {
+    btn.disabled = false; btn.textContent = oldTxt;
+  }
+};
+
+/* ================= تهيئة ================= */
+document.getElementById('cartModal').addEventListener('click', e => { if (e.target.id === 'cartModal') closeCart(); });
+let saved = 'ar'; try { saved = localStorage.getItem('lang') || 'ar'; } catch (e) {}
+setLang(saved);
+renderCart();
+</script>
+</body>
+</html>
