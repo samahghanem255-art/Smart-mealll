@@ -505,45 +505,50 @@ function updateCalStatus(totalCal) {
   if (ring) ring.style.strokeDashoffset = 314 - (314 * pct / 100);
   document.getElementById('calAdvice').textContent = totalCal > dailyCalorieGoal ? M('over') : M('good');
 }
-function confirmOrder(){
-  var nomEl = document.getElementById('customerName');
-  var telEl = document.getElementById('customerPhone');
-  var adrEl = document.getElementById('deliveryAddress');
-  var totalEl = document.getElementById('cartTotal');
-  var nom = nomEl ? nomEl.value.trim() : '';
-  var tel = telEl ? telEl.value.trim() : '';
-  var adr = adrEl ? adrEl.value.trim() : '';
-  var prix = totalEl ? totalEl.innerText : '0';
+  function confirmOrder(){
+  var nom = document.getElementById('customerName')?.value?.trim() || '';
+  var tel = document.getElementById('customerPhone')?.value?.trim() || '';
+  var adr = document.getElementById('deliveryAddress')?.value?.trim() || '';
+  var prix = document.getElementById('cartTotal')?.innerText || '0';
+  if(!cart || cart.length==0){ alert('❌ السلة فارغة'); return; }
+  if(!nom || !tel){ alert('❌ اكمل البيانات'); return; }
+  var items = cart.map(i=>i.name).join(' + ');
+  
+  var SUPA_URL = "https://qdknzgbpipbmghsmdjwj.supabase.com";
+  var SUPA_KEY = "sb_publishable__zunCTxVSFeSrWMVFQvJXw_Co45RocM";
 
-  if(typeof cart === 'undefined' || cart.length===0){
-    alert('❌ السلة فارغة - أضف وجبة أولا');
-    return;
-  }
-  if(!nom){ alert('❌ اكتب اسمك'); return; }
-  if(!tel){ alert('❌ اكتب رقم هاتفك'); return; }
-
-  var items = '';
-  try{ items = cart.map(function(i){return i.name}).join(' + '); }catch(e){ items='وجبات'; }
-
-  try{
-    if(typeof supa !== 'undefined' && supa){
-      supa.from('meal_orders').insert([{
-        nom: nom, telephone: tel, adresse: adr,
-        articles: items, prix: parseInt(prix)||0,
-        date_commande: new Date().toISOString().split('T')[0],
-        heure: new Date().toLocaleTimeString()
-      }]).then(function(res){ console.log('DB Saved', res); }).catch(function(err){ console.log('DB Error', err); });
+  fetch(SUPA_URL+"/rest/v1/meal_orders", {
+    method:"POST",
+    headers:{
+      apikey: SUPA_KEY, 
+      Authorization: "Bearer "+SUPA_KEY, 
+      "Content-Type":"application/json",
+      "Prefer":"return=minimal"
+    },
+    body: JSON.stringify({
+      nom: nom, 
+      telephone: tel, 
+      adresse: adr, 
+      articles: items, 
+      prix: parseInt(prix)||0, 
+      date_commande: new Date().toISOString().split('T')[0], 
+      heure: new Date().toLocaleTimeString()
+    })
+  }).then(r=>{ 
+    console.log('DB status:', r.status);
+    if(r.ok){
+      console.log('✅ تم الحفظ في قاعدة البيانات');
+    } else {
+      r.text().then(t=>{ console.log('DB error:', t); alert('خطأ قاعدة: '+t); });
     }
-  }catch(e){}
+  }).catch(e=>console.log('Fetch error', e));
 
-  alert('✅ تم تأكيد طلبك بنجاح!\nالاسم: '+nom+'\nالمجموع: '+prix+' دج');
-  var msg = 'طلب جديد Smart Meal%0A👤 '+encodeURIComponent(nom)+'%0A📞 '+tel+'%0A📍 '+encodeURIComponent(adr)+'%0A🍱 '+encodeURIComponent(items)+'%0A💰 '+prix+' دج';
+  alert('✅ تم تأكيد طلبك بنجاح يا '+nom+'!\nالمجموع: '+prix+' دج');
+  var msg = encodeURIComponent('طلب Smart Meal\n👤 '+nom+'\n📞 '+tel+'\n📍 '+adr+'\n🍱 '+items+'\n💰 '+prix+' دج');
   window.open('https://wa.me/213671070943?text='+msg, '_blank');
-
-  cart = [];
-  document.getElementById('cartCount').innerText='0';
+  cart=[]; document.getElementById('cartCount').innerText='0'; 
   document.getElementById('cartItems').innerHTML='<p style=text-align:center>تم إرسال الطلب ✅</p>';
-  setTimeout(closeCart, 1000);
+  setTimeout(closeCart, 800);
 }
 
 /* ================= تهيئة ================= */
