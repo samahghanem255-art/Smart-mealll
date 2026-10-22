@@ -353,6 +353,30 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.supabaseClient = supabase.createClient('https://xvghguxdgezhiowswvsd.supabase.co','sb_publishable_Sk-ark6LufVu-zOWxf6Ozg_ecumaQvG');
+let cart = [];
+function openCart(){ document.getElementById('cartModal')?.classList.add('active'); }
+function closeCart(){ document.getElementById('cartModal')?.classList.remove('active'); }
+function addToCart(name,price,cal){
+ cart.push({name,price,cal});
+ document.getElementById('cartCount').innerText = cart.length;
+ document.getElementById('cartTotal').innerText = cart.reduce((s,i)=>s+i.price,0);
+ document.getElementById('cartCalTotal').innerText = cart.reduce((s,i)=>s+i.cal,0);
+ let h=''; cart.forEach(i=>h+=`<p>${i.name} - ${i.price} دج</p>`);
+ document.getElementById('cartItems').innerHTML = h;
+ openCart();
+}
+async function confirmOrder(){
+ let nom = document.getElementById('customerName')?.value || '';
+ let telephone = document.getElementById('customerPhone')?.value || '';
+ let adresse = document.getElementById('deliveryAddress')?.value || '';
+ let prix = parseInt(document.getElementById('cartTotal')?.innerText || '0');
+ if(!nom || !telephone){ alert('اكتب اسمك وهاتفك'); return; }
+ let d=new Date();
+ let {error} = await window.supabaseClient.from('meal_orders').insert([{nom,telephone,adresse,prix,date_commande:d.toISOString().split('T')[0],heure:d.toLocaleTimeString()}]);
+ if(error){ alert(error.message); } else { alert('✅ تم الطلب'); cart=[]; closeCart(); }
+}
+</script>
 </body>
-</html>
