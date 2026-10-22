@@ -508,17 +508,16 @@ function updateCalStatus(totalCal) {
 
 /* ================= تأكيد الطلب + حفظه في قاعدة 
 function confirmOrder(){
-  // قراءة البيانات بطريقة آمنة
+function confirmOrder(){
   var nomEl = document.getElementById('customerName');
   var telEl = document.getElementById('customerPhone');
   var adrEl = document.getElementById('deliveryAddress');
   var totalEl = document.getElementById('cartTotal');
-  
   var nom = nomEl ? nomEl.value.trim() : '';
   var tel = telEl ? telEl.value.trim() : '';
   var adr = adrEl ? adrEl.value.trim() : '';
   var prix = totalEl ? totalEl.innerText : '0';
-  
+
   if(typeof cart === 'undefined' || cart.length===0){
     alert('❌ السلة فارغة - أضف وجبة أولا');
     return;
@@ -529,7 +528,6 @@ function confirmOrder(){
   var items = '';
   try{ items = cart.map(function(i){return i.name}).join(' + '); }catch(e){ items='وجبات'; }
 
-  // حفظ في الخلفية - لا ننتظره حتى لا يعلق الزر
   try{
     if(typeof supa !== 'undefined' && supa){
       supa.from('meal_orders').insert([{
@@ -537,23 +535,18 @@ function confirmOrder(){
         articles: items, prix: parseInt(prix)||0,
         date_commande: new Date().toISOString().split('T')[0],
         heure: new Date().toLocaleTimeString()
-      }]).then(function(res){
-        console.log('DB Saved', res);
-      }).catch(function(err){ console.log('DB Error', err); });
+      }]).then(function(res){ console.log('DB Saved', res); }).catch(function(err){ console.log('DB Error', err); });
     }
-  }catch(e){ console.log(e); }
+  }catch(e){}
 
-  // ✅ تأكيد فوري - هذا هو الأهم
-  alert('✅ تم تأكيد طلبك بنجاح!\nالاسم: '+nom+'\nالمجموع: '+prix+' دج\nسيتم تحويلك للواتساب الآن');
-
-  var msg = 'طلب جديد Smart Meal%0A👤 الاسم: '+encodeURIComponent(nom)+'%0A📞 الهاتف: '+tel+'%0A📍 العنوان: '+encodeURIComponent(adr)+'%0A🍱 الطلب: '+encodeURIComponent(items)+'%0A💰 المجموع: '+prix+' دج';
+  alert('✅ تم تأكيد طلبك بنجاح!\nالاسم: '+nom+'\nالمجموع: '+prix+' دج');
+  var msg = 'طلب جديد Smart Meal%0A👤 '+encodeURIComponent(nom)+'%0A📞 '+tel+'%0A📍 '+encodeURIComponent(adr)+'%0A🍱 '+encodeURIComponent(items)+'%0A💰 '+prix+' دج';
   window.open('https://wa.me/213671070943?text='+msg, '_blank');
 
-  // تفريغ السلة
   cart = [];
-  if(document.getElementById('cartCount')) document.getElementById('cartCount').innerText='0';
-  if(document.getElementById('cartItems')) document.getElementById('cartItems').innerHTML='<p style=text-align:center>تم إرسال الطلب ✅</p>';
-  if(typeof closeCart === 'function') setTimeout(closeCart, 1000);
+  document.getElementById('cartCount').innerText='0';
+  document.getElementById('cartItems').innerHTML='<p style=text-align:center>تم إرسال الطلب ✅</p>';
+  setTimeout(closeCart, 1000);
 }
 
 /* ================= تهيئة ================= */
