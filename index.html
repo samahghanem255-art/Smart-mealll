@@ -505,7 +505,6 @@ function updateCalStatus(totalCal) {
   if (ring) ring.style.strokeDashoffset = 314 - (314 * pct / 100);
   document.getElementById('calAdvice').textContent = totalCal > dailyCalorieGoal ? M('over') : M('good');
 }
-
 function confirmOrder(){
   var nomEl = document.getElementById('customerName');
   var telEl = document.getElementById('customerPhone');
